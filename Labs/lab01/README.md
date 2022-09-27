@@ -82,7 +82,7 @@ r *= a; // r == a^13
 ```
 
 In general we have the following recursive formula:
-$x^{n}=\begin{equation}\begin{cases}x\,(x^{2})^{\frac {n-1}{2}},&{\textnormal{if }}n{\textnormal{ is odd}}\\(x^{2})^{\frac {n}{2}},&{\textnormal{if }}n{\textnormal{ is even}}.\end{cases}\end{equation}$
+$x^{n}=x\,(x^{2})^{\frac {n-1}{2}}$ if $n$ is odd, $x^{n}=(x^{2})^{\frac {n}{2}}$ if $n$ is even.
 
 
 Implement a template function that given a base $x$ of type `typename T` and an exponent $n$ of type `unsigned int` computes $x^n$. 

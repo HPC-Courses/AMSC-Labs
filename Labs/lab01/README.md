@@ -68,7 +68,7 @@ It means that the version of Octave I have has been linked (by its developers) a
 # Exercise 2 - Templates
 Exponentiation by squaring is a general method for fast computation of large positive integer powers of a number or in general objects that have a multiplication operation (more precisely an element of a [semigroup](https://en.wikipedia.org/wiki/Semigroup), e.g. a matrix or a polynomial). 
 
-Lets start with an example:
+Let's start with an example:
 $$a^{13} = a^8 a^4 a^1, a \in \mathbb R$$
 Thus given $a$ we can compute $r=a^{13}$ with just seven operations as follows
 ```
@@ -82,7 +82,8 @@ r *= a; // r == a^13
 ```
 
 In general we have the following recursive formula:
-$$x^{n}={\begin{cases}x\,(x^{2})^{\frac {n-1}{2}},&{\textnormal{if }}n{\textnormal{ is odd}}\\(x^{2})^{\frac {n}{2}},&{\textnormal{if }}n{\textnormal{ is even}}.\end{cases}}$$
+$$x^{n}=\begin{equation*}\begin{cases}x\,(x^{2})^{\frac {n-1}{2}},&{\textnormal{if }}n{\textnormal{ is odd}}\\(x^{2})^{\frac {n}{2}},&{\textnormal{if }}n{\textnormal{ is even}}.\end{cases}\end{equation*}$$
+
 
 Implement a template function that given a base $x$ of type `typename T` and an exponent $n$ of type `unsigned int` computes $x^n$. 
 
@@ -134,11 +135,8 @@ implement appropriate overloaded operators to sum (`operator+`) and multiply (`o
 
 # Exercise 4 - Horner's method
 Horner's method is an algorithm for polynomial evaluation. The algorithm is based on Horner's rule:
-$$
-\begin{aligned}
-a_{0}&+a_{1}x+a_{2}x^{2}+a_{3}x^{3}+\cdots +a_{n}x^{n}\\&=a_{0}+x{\bigg (}a_{1}+x{\Big (}a_{2}+x{\big (}a_{3}+\cdots +x(a_{n-1}+x\,a_{n})\cdots {\big )}{\Big )}{\bigg )}.
-\end{aligned}
-$$
+$$a_{0}+a_{1}x+a_{2}x^{2}+a_{3}x^{3}+\cdots +a_{n}x^{n}$$
+$$=a_{0}+x{\bigg (}a_{1}+x{\Big (}a_{2}+x{\big (}a_{3}+\cdots +x(a_{n-1}+x\,a_{n})\cdots {\big )}{\Big )}{\bigg )}.$$
 1. Evaluate the complexity of the algorithm in terms of $n$, assume power elevation can be done only throught multiplicatoion
 2. Implement the following functions:
     - `eval`: given a vector of the coefficient of a polynomial evaluates the polynomial at the given point $x$ with the naive formula

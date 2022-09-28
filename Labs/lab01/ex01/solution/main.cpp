@@ -8,9 +8,9 @@ T pow_recursive(const T& base, unsigned int exp) {
   if (exp == 0)
     return  1;
   else if (exp % 2)
-    return base * pow(base * base, (exp - 1) / 2);
+    return base * pow_recursive(base * base, (exp - 1) / 2);
   else
-    return pow(base * base, exp / 2);
+    return pow_recursive(base * base, exp / 2);
 }
 
 template<typename T>

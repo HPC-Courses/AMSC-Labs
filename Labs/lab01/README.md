@@ -46,7 +46,7 @@ $$=a_{0}+x{\bigg (}a_{1}+x{\Big (}a_{2}+x{\big (}a_{3}+\cdots +x(a_{n-1}+x\,a_{n
 
 Take for instance the function `smaller_standard` in `smaller.cpp`. This is perfectly fine programming but it **might** cause performance issues due to the `if` statement.
 
-## How to diagnost problems?
+## How to diagnose problems?
 The best way is benchmarking your code (i.e. check its run time in significant scenarios), however we have some tools that can help us discovering this king of problems without having to benchmark our code.
 
 One of the best options is to check the Assembly code generate by your programm. To do this just use the flag `-S` when compiling. There are also interactive web tools that help you understand better the generate Assembly, see for instance [Compiler Explorer](https://godbolt.org/).

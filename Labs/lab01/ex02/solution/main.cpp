@@ -1,62 +1,51 @@
-#include <cmath>
 #include <iostream>
 #include <vector>
-#include <iomanip>
+#include <chrono>
+#include <cmath>
 
-template<typename T>
-T pow_recursive(const T& base, unsigned int exp) {
-  if (exp == 0)
-    return  1;
-  else if (exp % 2)
-    return base * pow(base * base, (exp - 1) / 2);
-  else
-    return pow(base * base, exp / 2);
-}
-
-template<typename T>
-T pow_iterative(T base, unsigned int exp) {
-  T res = 1;
-  while (exp > 0) {
-    if (exp & 1)
-      res *= base;
-    base *= base;
-    exp >>= 1;
-  }
-  return res;
-}
-
-double rel_error(double a, double b) {
-  if (a == 0 && b == 0)
-    return 0;
-  return std::abs(a - b) / std::max(std::abs(a), std::abs(b));
-}
-
-void test_error(double err, double toll) {
-  std::cout << err << " " << (err < toll ? "PASSED" : "FAIL") << std::endl;
-}
+#include "horner.hpp"
 
 int main() {
-  const std::vector<unsigned int> exponents = { 0, 1, 2, 3, 5, 7, 8, 13 };
-  const std::vector<unsigned long long int> base_uint = { 0, 1, 2, 3, 5, 7, 8, 13 };
-  const std::vector<double> base_double = { 0, 1, 2.3, 3.7, 5.4, 7.9, 8.1 };
+    unsigned int degree;
+    std::cout << "Polynomial degree" << std::endl;
+    std::cout << "=> ";
+    std::cin >> degree;
 
-  std::cout << "-- unsigned tests -----------------" << std::endl;
-  for (const auto& e : exponents) {
-    for (const auto& b : base_uint) {
-      std::cout << pow_recursive(b, e) - std::pow(b, e) << std::endl;
-      std::cout << pow_iterative(b, e) - std::pow(b, e) << std::endl;
+    std::vector<double> coeff(degree + 1);
+    std::cout << "Coefficients are computed automatically" << std::endl;
+    for (unsigned int i = 0; i <= degree; ++i)
+        coeff[i] = 2 * std::sin(2.0 * i);
+
+    const double x_0 = 0.00;
+    const double x_f = 1.00;
+    const unsigned int n = 100000;
+    const double h = (x_f - x_0) / (n - 1);
+
+    std::vector<double> points(n + 1);
+    for (unsigned int i = 0; i <= n; ++i)
+        points[i] = x_0 + i * h;
+
+    std::cout << "Computing " << n << " evaluations of polynomial"
+        << " with standard formula" << std::endl;
+    {
+        using namespace std::chrono;
+        const auto t0 = high_resolution_clock::now();
+        evaluate_poly(points, coeff, eval);
+        const auto t1 = high_resolution_clock::now();
+        const auto dt = duration_cast<milliseconds>(t1 - t0).count();
+        std::cout << "Elapsed: " << dt << " [ms]" << std::endl;
     }
-  }
 
-  std::cout << "-- double tests -----------------" << std::endl;
-  constexpr auto TOLL = std::numeric_limits<double>::epsilon() * 10;
-  std::cout << std::scientific << std::setprecision(6);
-  for (const auto& e : exponents) {
-    for (const auto& b : base_double) {
-      test_error(rel_error(pow_recursive(b, e), std::pow(b, e)), TOLL);
-      test_error(rel_error(pow_iterative(b, e), std::pow(b, e)), TOLL);
+    std::cout << "Computing " << n << " evaluations of polynomial"
+        << " with horner formula" << std::endl;
+    {
+        using namespace std::chrono;
+        const auto t0 = high_resolution_clock::now();
+        evaluate_poly(points, coeff, eval_horner);
+        const auto t1 = high_resolution_clock::now();
+        const auto dt = duration_cast<milliseconds>(t1 - t0).count();
+        std::cout << "Elapsed: " << dt << " [ms]" << std::endl;
     }
-  }
 
-  return 0;
+    return 0;
 }

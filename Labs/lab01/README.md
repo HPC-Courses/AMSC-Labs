@@ -18,7 +18,7 @@ In general we have the following recursive formula:
 $x^{n}=x\,(x^{2})^{\frac {n-1}{2}}$ if $n$ is odd, $x^{n}=(x^{2})^{\frac {n}{2}}$ if $n$ is even.
 
 
-Implement a template function that given a base $x$ of type `typename T` and an exponent $n$ of type `unsigned int` computes $x^n$. 
+Implement a template function that given a base $x$ of type `typename T` and an exponent $n$ of type `unsigned int` computes $x^n$. Start by implementing a recursive version, after that try implementing an iterative version.
 
 # Exercise 2 - Horner's method
 Horner's method is an algorithm for polynomial evaluation. The algorithm is based on Horner's rule:

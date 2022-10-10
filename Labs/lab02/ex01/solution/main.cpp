@@ -1,6 +1,7 @@
 #include <iostream>
 
-struct Noisy {
+class Noisy {
+  public:
   Noisy() { std::cout << "constructed at " << this << '\n'; }
   Noisy(const Noisy&) { std::cout << "copy-constructed\n"; }
   Noisy(Noisy&&) { std::cout << "move-constructed\n"; }

@@ -21,7 +21,7 @@ parametrically_change_object(1.0, 2.5, hdo);
 ```
 which is less readable, since you cannot immediatly understand which are the inputs and which are the outputs.
 
-## Assignements
+## Assignments
 1. Starting from the `hint` folder, implement a class `Noisy` that has a contructor, a copy constructor and a destructor which just print to the standard output that they have been called.
 2. Compile `main.cpp` and try to understand where copy elision is applied.
 
@@ -33,7 +33,7 @@ Newton's method is a numerical algorithm used to find roots of a function iterat
 
 $$x_{n+1}=x_{n}-{\frac {f(x_{n})}{f'(x_{n})}}$$
 
-## Assignements
+## Assignments
 Write a `NewtonSolver` class that takes as constructor arguments 
 - the function $f(x)$
 - its derivative $f'(x)$

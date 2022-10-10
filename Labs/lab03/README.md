@@ -45,7 +45,7 @@ ldd ${mkOctavePrefix}/lib/octave/6.2.0/liboctave.so
 ```
 It means that the version of Octave I have has been linked (by its developers) against version 3 of the `libfftw3` library.
 
-## Assignements
+## Assignments
 1. Compile `test.cpp` including the library `mylib.hpp` directly.
 2. Compile `mylib.hpp` as a shared library.
 3. Compile `test.cpp` linking the shared library `mylib.so`.

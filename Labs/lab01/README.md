@@ -32,7 +32,7 @@ $$=a_{0}+x{\bigg (}a_{1}+x{\Big (}a_{2}+x{\big (}a_{3}+\cdots +x(a_{n-1}+x\,a_{n
 3. Using the standard library `<chrono>` evaluate the difference in time between the two methods for a polynomial of degree $n$, read from standard input, and with coefficients $a_k = 2\sin(2k)$ at $M$ points uniformly distributed between $x_0=0$ and $x_n=1$, where $M$ is hard coded.
 4. Test the algorithms for varius values of $n$ and $M$.
 
-## Advanced assignements
+## Advanced assignments
 - Use the `<regex>` library to parse the file `params.dat` and make $n, M, x_0, x_f$ parametric. Use an appropriate data structure to store the parameters.
 - Implement a funtion `timeit` that given a `void()` function times its exectution time using `<chrono>`. Define a vector of tests containing `eval` and `eval_horner`; use `timeit` to time their execution. 
 - Use `<ranges>` to instanciate the coefficients of the polynomial and the evaluation points without using a for loop.

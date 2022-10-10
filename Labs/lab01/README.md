@@ -24,32 +24,32 @@ Implement a template function that given a base $x$ of type `typename T` and an 
 Horner's method is an algorithm for polynomial evaluation. The algorithm is based on Horner's rule:
 $$p_a(x) = a_{0}+a_{1}x+a_{2}x^{2}+a_{3}x^{3}+\cdots +a_{n}x^{n}$$
 $$=a_{0}+x{\bigg (}a_{1}+x{\Big (}a_{2}+x{\big (}a_{3}+\cdots +x(a_{n-1}+x\,a_{n})\cdots {\big )}{\Big )}{\bigg )}.$$
-1. Evaluate the complexity of the algorithm in terms of $n$, assume power elevation can be done only throught multiplicatoion
+1. Evaluate the complexity of the algorithm in terms of $n$, assume power elevation can be done only through multiplication
 2. Implement the following functions:
     - `eval`: given a vector of the coefficient $a=(a_0, ..., a_n)$ of a polynomial and a point $x$ evaluates the polynomial $p_a(x)$ with the naive formula
     - `eval_horner`: given a vector of the coefficient $a=(a_0, ..., a_n)$ of a polynomial and a point $x$ evaluates the polynomial $p_a(x)$ with the horner's rule
     - `evaluate_poly`: given a vector of the coefficient $a=(a_0, ..., a_n)$ of a polynomial and an evaluation function (i.e. either `eval` or `eval_horner`) and a vector of points $x=(x_0, ..., x_1)$ evaluates the polynomial at each given point in a vector, i.e. returns $(p_a(x_0), ..., p_a(x_n))$.
 3. Using the standard library `<chrono>` evaluate the difference in time between the two methods for a polynomial of degree $n$, read from standard input, and with coefficients $a_k = 2\sin(2k)$ at $M$ points uniformly distributed between $x_0=0$ and $x_n=1$, where $M$ is hard coded.
-4. Test the algorithms for varius values of $n$ and $M$.
+4. Test the algorithms for various values of $n$ and $M$.
 
 ## Advanced assignments
 - Use the `<regex>` library to parse the file `params.dat` and make $n, M, x_0, x_f$ parametric. Use an appropriate data structure to store the parameters.
-- Implement a funtion `timeit` that given a `void()` function times its exectution time using `<chrono>`. Define a vector of tests containing `eval` and `eval_horner`; use `timeit` to time their execution. 
-- Use `<ranges>` to instanciate the coefficients of the polynomial and the evaluation points without using a for loop.
+- Implement a function `timeit` that given a `void()` function times its execution time using `<chrono>`. Define a vector of tests containing `eval` and `eval_horner`; use `timeit` to time their execution. 
+- Use `<ranges>` to instantiate the coefficients of the polynomial and the evaluation points without using a for loop.
 - Modify `evaluate_poly` to use `std::transform` instead of a for loop. Exploit the parallel execution policies of `std::transform`. **WARNING:** requires to link against the Intel Threading Building Blocks (TBB) library (preprocessor flags `-I${mkTbbInc}`, linker flags `-L${mkTbbLib} -ltbb`)
 - Convert eval and eval horner from function pointers to `std::function`
 - Use exponentiation by squaring in `eval`
 
 
 # Exercise 3 - Branchless programming
-`if`, `switch`, and other conditional statements often corresponds to machine instructions that can’t be effectively predicted by the CPU. This is due to the fact that they correspond to 'jump' instructions that make the CPU interrupt the flow of instruction to jump to another adress. Indeed, they muse a long pipeline stall to fetch new instructions after a branch mispredict.
+`if`, `switch`, and other conditional statements often corresponds to machine instructions that can’t be effectively predicted by the CPU. This is due to the fact that they correspond to 'jump' instructions that make the CPU interrupt the flow of instruction to jump to another address. Indeed, they muse a long pipeline stall to fetch new instructions after a branch mis-predict.
 
 Take for instance the function `smaller_standard` in `smaller.cpp`. This is perfectly fine programming but it **might** cause performance issues due to the `if` statement.
 
 ## How to diagnose problems?
 The best way is benchmarking your code (i.e. check its run time in significant scenarios), however we have some tools that can help us discovering this king of problems without having to benchmark our code.
 
-One of the best options is to check the Assembly code generate by your programm. To do this just use the flag `-S` when compiling. There are also interactive web tools that help you understand better the generate Assembly, see for instance [Compiler Explorer](https://godbolt.org/).
+One of the best options is to check the Assembly code generate by your program. To do this just use the flag `-S` when compiling. There are also interactive web tools that help you understand better the generate Assembly, see for instance [Compiler Explorer](https://godbolt.org/).
 
 1. Compile `smaller.cpp` and check its machine code. Try different optimization options `-O0`, `-O1`, `-O2`, `-O3`. What do you see?
 2. Repeat the same for `toupper.cpp`. What do you expect? Run the benchmark and see if you where right.

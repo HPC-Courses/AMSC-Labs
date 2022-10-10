@@ -22,14 +22,14 @@ Implement a template function that given a base $x$ of type `typename T` and an 
 
 # Exercise 2 - Horner's method
 Horner's method is an algorithm for polynomial evaluation. The algorithm is based on Horner's rule:
-$$a_{0}+a_{1}x+a_{2}x^{2}+a_{3}x^{3}+\cdots +a_{n}x^{n}$$
+$$p_a(x) = a_{0}+a_{1}x+a_{2}x^{2}+a_{3}x^{3}+\cdots +a_{n}x^{n}$$
 $$=a_{0}+x{\bigg (}a_{1}+x{\Big (}a_{2}+x{\big (}a_{3}+\cdots +x(a_{n-1}+x\,a_{n})\cdots {\big )}{\Big )}{\bigg )}.$$
 1. Evaluate the complexity of the algorithm in terms of $n$, assume power elevation can be done only throught multiplicatoion
 2. Implement the following functions:
-    - `eval`: given a vector of the coefficient of a polynomial evaluates the polynomial at the given point $x$ with the naive formula
-    - `eval_horner`: given a vector of the coefficient of a polynomial evaluates the polynomial at the given point $x$ with the horner's rule
-    - `evaluate_poly`: given a vector of the coefficient of a polynomial and an evaluation function (i.e. either `eval` or `eval_horner`) evaluates the polynomial at each given point in a vector.
-3. Using the standard library `<chrono>` evaluate the difference in time between the two methods for a polynomial of degree $n$, read from standard input, and with coefficients $2\sin(2k)$ at $M$ points between $x_0=0$ and $x_f=1$, where $M$ is hard coded.
+    - `eval`: given a vector of the coefficient $a=(a_0, ..., a_n)$ of a polynomial and a point $x$ evaluates the polynomial $p_a(x)$ with the naive formula
+    - `eval_horner`: given a vector of the coefficient $a=(a_0, ..., a_n)$ of a polynomial and a point $x$ evaluates the polynomial $p_a(x)$ with the horner's rule
+    - `evaluate_poly`: given a vector of the coefficient $a=(a_0, ..., a_n)$ of a polynomial and an evaluation function (i.e. either `eval` or `eval_horner`) and a vector of points $x=(x_0, ..., x_1)$ evaluates the polynomial at each given point in a vector, i.e. returns $(p_a(x_0), ..., p_a(x_n))$.
+3. Using the standard library `<chrono>` evaluate the difference in time between the two methods for a polynomial of degree $n$, read from standard input, and with coefficients $a_k = 2\sin(2k)$ at $M$ points uniformly distributed between $x_0=0$ and $x_n=1$, where $M$ is hard coded.
 4. Test the algorithms for varius values of $n$ and $M$.
 
 ## Advanced assignements

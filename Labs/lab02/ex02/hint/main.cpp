@@ -21,12 +21,8 @@ private:
 
 
 int main() {
-    std::vector<std::shared_ptr<Shape>> shapes;
-    shapes.push_back(std::make_shared<Circle>(1.0));
-    shapes.push_back(std::make_shared<Rectangle>(2.5, 0.2));
-
-    for (const auto& s : shapes) {
-        std::cout << "I am a " << s->getName() << ", my area is: " << s->getArea() << std::endl;
-    }
+    // Instantiate vector of shapes
+    // Add some shapes
+    // Loop over shapes and print
     return 0;
 }

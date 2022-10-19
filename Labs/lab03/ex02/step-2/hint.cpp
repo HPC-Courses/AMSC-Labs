@@ -19,9 +19,9 @@ using Vector = std::vector<elem_t>;
 class SparseMatrix {
 public:
   SparseMatrix() : m_nnz(0), m_nrows(0), m_ncols(0) {};
-  inline size_t nrows() { return m_nrows; }
-  inline size_t ncols() { return m_ncols; }
-  inline size_t nnz() { return m_nnz; }
+  size_t nrows() { return m_nrows; }
+  size_t ncols() { return m_ncols; }
+  size_t nnz() { return m_nnz; }
 
   void print(std::ostream& os) {
     std::cout << "nrows: " << m_nrows << " | ncols:" << m_ncols << " | nnz: " << m_nnz << std::endl;
@@ -42,43 +42,26 @@ protected:
 class MapMatrix : public SparseMatrix {
 public:
   virtual Vector vmult(const Vector& x) const override {
-    assert(x.size() == m_ncols);
-    Vector res(x.size());
-    for (size_t i = 0; i < m_data.size(); ++i) {
-      for (const auto& [j, v] : m_data[i]) {
-        res[i] += x[j] * v;
-      }
-    }
-    return res;
+    // assert x.size() == m_ncols
+    // allocate memory for result and initialize to 0
+    // loop over each element of the matrix and add contribute to result
   }
 
   virtual double& operator()(size_t i, size_t j) override {
-    if (m_data.size() < i + 1) {
-      m_data.resize(i + 1);
-      m_nrows = i + 1;
-    }
-    const auto it = m_data[i].find(j);
-    if (it == m_data[i].end()) {
-      m_ncols = std::max(m_ncols, j + 1);
-      m_nnz++;
-      return (*m_data[i].emplace(j, 0).first).second;
-    }
-    return (*it).second;
+    // check if we have enough rows, if not add them
+    // find column entry, if not present add it
+    // return value reference
   }
   virtual const double& operator()(size_t i, size_t j) const override {
-    return m_data[i].at(j);
+    // return value reference with no check, we use the c++ convention of no bounds check 
   }
   virtual ~MapMatrix() override = default;
 protected:
   virtual void _print(std::ostream& os) const {
-    for (size_t i = 0; i < m_data.size(); ++i) {
-      for (const auto& [j, v] : m_data[i])
-        os << i << "," << j << "," << v << std::endl;
-    }
+    // print the data
   }
 
-private:
-  std::vector<std::map<size_t, elem_t>> m_data;
+  /*the data is stored in a vector of maps of type size_t, elem_t*/ m_data;
 };
 
 int main() {

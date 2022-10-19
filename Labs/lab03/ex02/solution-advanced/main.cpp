@@ -22,9 +22,9 @@ using Vector = std::vector<elem_t>;
 class SparseMatrix {
 public:
   SparseMatrix() : m_nnz(0), m_nrows(0), m_ncols(0) {};
-  inline size_t nrows() { return m_nrows; }
-  inline size_t ncols() { return m_ncols; }
-  inline size_t nnz() { return m_nnz; }
+  size_t nrows() { return m_nrows; }
+  size_t ncols() { return m_ncols; }
+  size_t nnz() { return m_nnz; }
 
   // we should always print the dimension of the matrix
   // to avoid repeating code in the children we implement here 
@@ -112,7 +112,7 @@ private:
   // utility to find element among the data
   // if we keep the Vector sorted we can find the element in O(log nnz) with std::lower_bound
   // instead of O(nnz) when using std::find_if
-  inline std::vector<ijv_t>::const_iterator find_elem(size_t i, size_t j) const {
+  std::vector<ijv_t>::const_iterator find_elem(size_t i, size_t j) const {
     // with consexpr the 'if' is resolved at complile time, we have no overhead at compile time
     if constexpr (KeepSorted) {
       return std::lower_bound(
@@ -255,11 +255,11 @@ auto timeit(const std::function<void()>& f) {
   const auto t0 = high_resolution_clock::now();
   f();
   const auto t1 = high_resolution_clock::now();
-  return duration_cast<milliseconds>(t1 - t0).count();
+  return duration_cast<microseconds>(t1 - t0).count();
 }
 
 int main() {
-  constexpr size_t N = 100000; // size of the matrix
+  constexpr size_t N = 20000; // size of the matrix
   Vector x(N), res(N); // 'res' is the vmult result of matrix * x
   std::iota(x.begin(), x.end(), 0);
   res[0] = 1;

@@ -19,9 +19,9 @@ using Vector = std::vector<elem_t>;
 class SparseMatrix {
 public:
   SparseMatrix() : m_nnz(0), m_nrows(0), m_ncols(0) {};
-  inline size_t nrows() { return m_nrows; }
-  inline size_t ncols() { return m_ncols; }
-  inline size_t nnz() { return m_nnz; }
+  size_t nrows() { return m_nrows; }
+  size_t ncols() { return m_ncols; }
+  size_t nnz() { return m_nnz; }
 
   void print(std::ostream& os) {
     std::cout << "nrows: " << m_nrows << " | ncols:" << m_ncols << " | nnz: " << m_nnz << std::endl;
@@ -81,44 +81,51 @@ private:
   std::vector<std::map<size_t, elem_t>> m_data;
 };
 
+// fill a tridiagonal matrix
+void fill_matrix(SparseMatrix& mm, size_t N) {
+  // TODO: fill the matrix mm as a tridiagonal matrix with -2 on main diagonal 
+  // and 1 on the first upper and lower sub-diagonal using the operator (i, j)
+  // e.g mm(0, 0) = -2
+}
 
-class CooMatrix : public SparseMatrix {
-public:
-  virtual Vector vmult(const Vector& x) const override {
-    // assert x.size() == m_ncols
-    // allocate memory for result and initialize to 0
-    // loop over each element of the matrix and add contribute to result
-  }
-  virtual double& operator()(size_t i, size_t j) override {
-    // find if the element is present with 'it = std::lower_bound(...)'
-    // if 'it' points the end then we add a new element
-    // else if 'it' does not points the element we are looking for means it is pointing
-    // exactly where we should add the new elemnt, so we add one element to the end
-    // and shift the elements after (*it) one place forward
-    // we update nnz, nrows and ncols accordingly to what we have done
-    // then return a reference to the element
-  }
-  virtual const double& operator()(size_t i, size_t j) const override {
-    // find the element with std::lower_bound and return it with no checks
-  }
+// TODO: implement a function 'bool eq(const Vector &lhs, const Vector &rhs)' 
+// to check if two vectors are the same
 
-  virtual ~CooMatrix() override = default;
-private:
-  virtual void _print(std::ostream& os) const {
-    // loop over each elemnt and print it
-  }
-  // define the type 'ijv_t' that is the type of the tuple containg the row index, 
-  // col index and value of an element
-  std::vector<ijv_t> m_data;
-};
 
+// time a function execution time
+auto timeit(const std::function<void()>& f) {
+  using namespace std::chrono;
+  const auto t0 = high_resolution_clock::now();
+  f();
+  const auto t1 = high_resolution_clock::now();
+  return duration_cast<milliseconds>(t1 - t0).count();
+}
+
+// utility for printing the result of a test
+void print_test_result(bool r, const std::string& test_name) {
+  std::cout << test_name << " test: " << (r ? "PASSED" : "FAILED") << std::endl;
+}
 
 int main() {
-  CooMatrix m;
-  m(0, 0) = 1;
-  m(1, 1) = 1;
-  m.print(std::cout);
-  const auto x = m.vmult({ {2, 3} });
-  std::cout << x[0] << " " << x[1] << std::endl;
+  constexpr size_t N = 5; // size of the matrix
+  Vector x(N), res(N); // 'res' is the vmult result of matrix * x
+  std::iota(x.begin(), x.end(), 0);
+  res[0] = 1;
+  res[N - 1] = -elem_t(N);
+
+  MapMatrix mtx;
+  
+  const auto dt_insert = timeit([&]() {fill_matrix(mtx, N);});
+  print_test_result((mtx.nrows() == N) && (mtx.ncols() == N) && (mtx.nnz() == 3 * N - 2), "dimension");
+  std::cout << "Elapsed for element access: " << dt_insert << "[ms]" << std::endl;
+
+  Vector b;
+  const auto dt_vmult = timeit([&]() {b = mtx.vmult(x);});
+  print_test_result(eq(res, b), "vmult");
+  std::cout << "Elapsed for vmult: " << dt_vmult << "[ms]" << std::endl;
+  std::cout << "--------------------------" << std::endl;
+  mtx.print(std::cout);
+  std::cout << "--------------------------" << std::endl;
+
   return 0;
 }

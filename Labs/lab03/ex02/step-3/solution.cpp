@@ -19,9 +19,9 @@ using Vector = std::vector<elem_t>;
 class SparseMatrix {
 public:
   SparseMatrix() : m_nnz(0), m_nrows(0), m_ncols(0) {};
-  inline size_t nrows() { return m_nrows; }
-  inline size_t ncols() { return m_ncols; }
-  inline size_t nnz() { return m_nnz; }
+  size_t nrows() { return m_nrows; }
+  size_t ncols() { return m_ncols; }
+  size_t nnz() { return m_nnz; }
 
   void print(std::ostream& os) {
     std::cout << "nrows: " << m_nrows << " | ncols:" << m_ncols << " | nnz: " << m_nnz << std::endl;
@@ -82,62 +82,6 @@ private:
 };
 
 
-class CooMatrix : public SparseMatrix {
-public:
-  virtual Vector vmult(const Vector& x) const override {
-    assert(x.size() == m_ncols);
-    Vector res(x.size());
-    for (const auto& ijv : m_data) {
-      res[std::get<0>(ijv)] += x[std::get<1>(ijv)] * std::get<2>(ijv);
-    }
-    return res;
-  }
-  virtual double& operator()(size_t i, size_t j) override {
-    const auto it = find_elem(i, j);
-    const size_t idx = it - m_data.begin();
-    if (it == m_data.cend()) {
-      m_data.emplace_back(std::forward_as_tuple(i, j, 0));
-      m_nnz++;
-      m_ncols = std::max(m_ncols, j + 1);
-      m_nrows = std::max(m_nrows, i + 1);
-      return std::get<2>(m_data.back());
-    }
-    if ((std::get<0>(*it) != i) || (std::get<1>(*it) != j)) {
-      m_data.push_back(m_data.back());
-      for (size_t k = m_data.size() - 2; k > idx; --k)
-        m_data[k] = m_data[k - 1];
-      m_data[idx] = std::make_tuple(i, j, 0);
-      m_nnz++;
-      m_ncols = std::max(m_ncols, j + 1);
-      m_nrows = std::max(m_nrows, i + 1);
-    }
-    return std::get<2>(m_data[idx]);
-  }
-  virtual const double& operator()(size_t i, size_t j) const override {
-    const auto it = find_elem(i, j);
-    return std::get<2>(*it);
-  }
-
-  virtual ~CooMatrix() override = default;
-private:
-  virtual void _print(std::ostream& os) const {
-    for (const auto& ijv : m_data)
-      os << std::get<0>(ijv) << "," << std::get<1>(ijv) << "," << std::get<2>(ijv) << std::endl;
-  }
-  using ijv_t = std::tuple<size_t, size_t, elem_t>;
-  inline std::vector<ijv_t>::const_iterator find_elem(size_t i, size_t j) const {
-    return std::lower_bound(
-      m_data.begin(),
-      m_data.end(),
-      std::make_pair(i, j),
-      [](const ijv_t& x, const auto& value) {
-        return (std::get<0>(x) < value.first) || ((std::get<0>(x) == value.first) && (std::get<1>(x) < value.second));
-      });
-  }
-  std::vector<ijv_t> m_data;
-};
-
-
 // fill a tridiagonal matrix
 void fill_matrix(SparseMatrix& mm, size_t N) {
   mm(N - 1, N - 2) = 1;
@@ -184,25 +128,19 @@ int main() {
   res[0] = 1;
   res[N - 1] = -elem_t(N);
 
-  std::vector<std::shared_ptr<SparseMatrix>> matrices = {
-    std::make_shared<MapMatrix>(),
-    std::make_shared<CooMatrix>(),
-  };
+  MapMatrix mtx;
+  
+  const auto dt_insert = timeit([&]() {fill_matrix(mtx, N);});
+  print_test_result((mtx.nrows() == N) && (mtx.ncols() == N) && (mtx.nnz() == 3 * N - 2), "dimension");
+  std::cout << "Elapsed for element access: " << dt_insert << "[ms]" << std::endl;
 
-  // loop over every matrix and test and benckmark it
-  for (auto& mtx : matrices) {
-    const auto dt_insert = timeit([&]() {fill_matrix(*mtx, N);});
-    print_test_result((mtx->nrows() == N) && (mtx->ncols() == N) && (mtx->nnz() == 3 * N - 2), "dimension");
-    std::cout << "Elapsed for element access: " << dt_insert << "[ms]" << std::endl;
-
-    Vector b;
-    const auto dt_vmult = timeit([&]() {b = mtx->vmult(x);});
-    print_test_result(eq(res, b), "vmult");
-    std::cout << "Elapsed for vmult: " << dt_vmult << "[ms]" << std::endl;
-    std::cout << "--------------------------" << std::endl;
-    mtx->print(std::cout);
-    std::cout << "--------------------------" << std::endl;
-  }
+  Vector b;
+  const auto dt_vmult = timeit([&]() {b = mtx.vmult(x);});
+  print_test_result(eq(res, b), "vmult");
+  std::cout << "Elapsed for vmult: " << dt_vmult << "[ms]" << std::endl;
+  std::cout << "--------------------------" << std::endl;
+  mtx.print(std::cout);
+  std::cout << "--------------------------" << std::endl;
 
   return 0;
 }

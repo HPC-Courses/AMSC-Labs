@@ -23,7 +23,7 @@ bool eq(const T& lhs, const T& rhs) {
   return true;
 }
 
-void print_bool(bool b) {
+void print_passed(bool b) {
   std::cout << (b ? "PASSED" : "FAILED") << std::endl;
 }
 
@@ -35,7 +35,7 @@ int main() {
   const std::vector<int> v = {7, 8, 9, 2, 0, 7, 6, 4, 1, 1, 0, 4, 5, 6, 7, 3};
   std::vector<int> sorted_and_unique;
   // WRITE HERE YOUR SOLUTION
-  print_bool(eq(sorted_and_unique, {{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}}));
+  print_passed(eq(sorted_and_unique, {{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}}));
   // --------------------------------------------------------------------------
   // --------------------------------------------------------------------------
   // --------------------------------------------------------------------------
@@ -50,7 +50,7 @@ int main() {
       "you",    "fear",   "in",   "a",      "handful", "of",        "dust"};
   std::map<std::string, size_t> word_count;
   // WRITE HERE YOUR SOLUTION
-  print_bool(
+  print_passed(
       eq(word_count,
          {{"a", 1},         {"and", 1},      {"at", 2},      {"behind", 1},
           {"different", 1}, {"dust", 1},     {"either", 1},  {"evening", 1},
@@ -75,7 +75,7 @@ int main() {
   const std::vector<std::string> funs = {"tan", "sin", "exp"};
   std::vector<double> fx;
   // WRITE HERE YOUR SOLUTION
-  print_bool(eq(fx, {{std::tan(0.9), std::sin(0.9), std::exp(0.9)}}));
+  print_passed(eq(fx, {{std::tan(0.9), std::sin(0.9), std::exp(0.9)}}));
   // --------------------------------------------------------------------------
   // --------------------------------------------------------------------------
   // --------------------------------------------------------------------------
@@ -86,9 +86,9 @@ int main() {
   // * for_each
   std::vector<int> range11(11);
   std::iota(range11.begin(), range11.end(), 0);
-  std::vector<int> range11even_squares(6);
+  std::vector<int> range11even_squares;
   // WRITE HERE YOUR SOLUTION
-  print_bool(eq(range11even_squares, {{0, 4, 16, 36, 64, 100}}));
+  print_passed(eq(range11even_squares, {{0, 4, 16, 36, 64, 100}}));
   // --------------------------------------------------------------------------
   return 0;
 }

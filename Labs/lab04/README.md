@@ -1,65 +1,98 @@
-# Exercise 1 - Static and shared libraries
-Often in your code you will need to employ libraries developed by others. They come in two flavors: static libraries and shared libraries.
+# Exercise 1 - argc and argv, I/O syncronization
+The aim of this execise is to implement a slightly more advanced version of the standard MPI "Hello World" example. Namely it will have two features:
+* The I/O is handled only by the processor with rank zero. Namely, only processor zero will use `std::cout`, the other processors will need to send the message they want to output to processor zero.
+* The "Hello world" greeting is personalized by looking at the arguments passed to the executable at run-time. Namely, if at least one extra argument is provided, it will be who we greet (e.g. "Hello Matteo"). If, on the other hand, no argument is provided, the standard "Hello world" is printed.
 
-Shared libraries are `.so` files. All the code relating to the library is in this file, and it is referenced by programs using it at run-time. A program using a shared library only makes reference to the code that it uses in the shared library.
-
-Static libraries are `.a` files. All the code relating to the library is in this file, and it is directly linked into the program at compile time. A program using a static library takes copies of the code that it uses from the static library and makes it part of the program.
-
-There are advantages and disadvantages in each method:
-
-- Shared libraries reduce the amount of code that is duplicated in each program that makes use of the library, keeping the binaries small. It also allows you to replace the shared object with one that is functionally equivalent, but may have added performance benefits without needing to recompile the program that makes use of it. Shared libraries will, however have a small additional cost for the execution of the functions as well as a run-time loading cost as all the symbols in the library need to be connected to the things they use. Additionally, shared libraries can be loaded into an application at run-time, which is the general mechanism for implementing binary plug-in systems.
-
-- Static libraries increase the overall size of the binary, but it means that you don't need to carry along a copy of the library that is being used. As the code is connected at compile time there are not any additional run-time loading costs. The code is simply there.
-
-## How to build a shared library?
-We will dedicate another lecture to this issue, where we will also show how to handle shared libraries and symbols dynamically. For the moment we need to know only the following:
-- When building a shared library we need to pass the option `-shared` to the linker
-- Object code used in a shared library must be position independent (compiler option `-fPIC`)
-Basic build of a shared library starting from an object file:
-```bash
-g++ -shared -Wl,-soname,libutility.so utility.o -o libutility.so
+Compile your executable with the following flags:
 ```
-
-## Where does the loader search for shared libraries?
-In computer systems a loader is the part of an operating system that is responsible for loading programs and libraries. It is one of the essential stages in the process of starting a program, as it places programs into memory and prepares them for execution. Loading a program involves reading the contents of the executable file containing the program instructions into memory, and then carrying out other required preparatory tasks to prepare the executable for running. This includes finding the libraries linked in the executable.
-
-It looks in `/lib`, `/usr/lib`, in all the directories contained in `/etc/ld.conf` and in all `.conf` contained in the `/etc/ld.conf.d/` directory (so the search strategy is different than that of the linker!.
-
-Alternative ways of directing the loader are:
-- Setting the environment variable `LD_LIBRARY_PATH`. If it contains a comma-separated list of directory names the loader will first look for libraries on these directories (analogous to PATH for executables):
-```bash
-export LD_LIBRARY_PATH+=:dir1:dir2
+mpicxx main.cpp -Wall -Wextra -pedantic -std=c++20 -O0
 ```
-- With the special flag `-Wl,-rpath=directory` during the compilation of the executable, for instance
-```bash
-g++ main.cpp -o main -Wl,-rpath=/opt/lib -L. -lsmall
+Test it with no extra arguments
 ```
-Here the loader will look in `/opt/lib` before the standard directories. You can use also relative paths.
-
-## Listing the shared libraries used
-The command `ldd` lists the shared libraries used by an object file.
-For example:
-```bash
-module load octave
-ldd ${mkOctavePrefix}/lib/octave/6.2.0/liboctave.so
+$ mpirun -n 2 ./a.out
+Hello, world, from rank 0 of 2.
+Hello, world, from rank 1 of 2.
 ```
-It means that the version of Octave I have has been linked (by its developers) against version 3 of the `libfftw3` library.
+and with one extra argument
+```
+$ mpirun -n 2 ./a.out Matteo
+Hello, Matteo, from rank 0 of 2.
+Hello, Matteo, from rank 1 of 2.
+```
+Notice that in this way we are guaranteed that the greeting will be printed without superimposition between processors and with increasing rank values.
 
-## Assignments
-1. Compile `test.cpp` including the library `mylib.hpp` directly.
-2. Compile `mylib.hpp` as a shared library.
-3. Compile `test.cpp` linking the shared library `mylib.so`.
-4. Use `ldd` on the two executable of the main, what are the differences?
-5. Compile `mylib.hpp` as a shared library without using the flag `-Wl,-rpath=directory`.
+# Exercise 2 - $n$-dimensional gradient computation
+Given the $n$-dimensional scalar field $f$
+$$f: \mathbb R^n \rightarrow \mathbb R,$$
+we want to compute its gradient at a given point $\mathbf y \in \mathbb R^n$
+$$\nabla f(\mathbf x) |_{\mathbf y } = [\partial_{x_1}f(\mathbf x)|_{y_1}, ..., \partial_{x_n}f(\mathbf x)|_{y_n}].$$
+To this end, we employ centered finite differences to approximate each component of the gradient. Namely:
+$$\partial_{x_i}f(\mathbf x)|_{y_i} \approx \frac{f(\mathbf y^+_i) - f(\mathbf y^-_i)}{2h},$$
+where $\mathbf y^+_i, \mathbf y^-_i \in \mathbb R^n$ are vectors equal to $\mathbf y$ apart from the $i$-th component, namely
+$$\mathbf y^+_i = [y_0, ..., y_{i-1}, y_i + h , y_{i+1}, ..., y_n], \quad \mathbf y^-_i = [y_0, ..., y_{i-1}, y_i - h , y_{i+1}, ..., y_n].$$
 
-## Solutions
-<details>
-<summary>Spoiler solutions</summary>
+Implement a function (that should work irrespective of $n$)
+```cpp
+template<size_t N>
+std::array<double, N> compute_gradient(
+  const std::function<double (const std::array<double, N> &)> &f,
+  const std::array<double, N> &y, 
+  double h)
+```
+that given as inputs:
+* the scalar field $f$, `const std::function<double (const std::array<double, N> &)> &f`
+* the point $\mathbf y$, `const std::array<double, N> &y`
+* the finite difference pace $h$, `double h`
 
-1. `g++ -I ${mkEigenInc} -I ./mylib/ main.cpp -o main_embedded`
-2. `cd mylib/ && g++ -fPIC -shared -Wl,-soname,libmylib.so mylib.hpp -o libmylib.so`
-3. `g++ -I ${mkEigenInc} -I ./mylib/ -L ./mylib -lmylib -Wl,-rpath=${PWD}/mylib main.cpp -o main_shared`
-4. `ldd main_embedded`, `ldd main_shared`, in the first case there is not `mylib` among the shared libraries.
-5. `export LD_LIBRARY_PATH+=:$PWD/mylib && g++ -I ${mkEigenInc} -I ./mylib/ -L ./mylib -lmylib main.cpp -o main_shared`
+returns the gradient $\nabla f(\mathbf x) |_{\mathbf y }$ as `std::array<double, N>`, where each component is computed in parallel by a different processor and is then collectd by processor zero by means of `MPI_Send` and `MPI_Recv`. We can assume that $y, h$ and $N$ are already known by all processors.
 
-</details>
+# Exercise 3 - Monte Carlo integration
+
+### Monte Carlo integration method
+The problem Monte Carlo integration addresses is the computation of a definite integral
+$$I = \int_\Omega f(x) dx$$
+where $\Omega \subset \mathbb R$ has measure $|\Omega|$
+$$|\Omega| = \int_\Omega dx.$$
+The naive Monte Carlo approach is to sample $N$ points uniformly in $\Omega$ 
+$$x_1, ..., x_N \in \Omega,$$
+and approximate $I$ as
+$$I \approx Q_N = |\Omega| \frac{1}{N}\sum_{i=1}^N f(x_i) = |\Omega| \bar f,$$
+where $\bar f$ is the average of the $f(x_i)$. Ideed, by the law of large numbers:
+$$\lim_{N\rightarrow+\infty} Q_N = I = \int_\Omega f(x) dx.$$
+It can be shown that the estimation of the error of $Q_N$ is
+$$\delta Q_N \approx \frac{|\Omega|}{\sqrt N} \sigma_N,$$
+where
+$$\sigma_N^2 = \frac{1}{N-1}\sum_{i=0}^N\left[f(x_i) - \left(\frac{1}{N}\sum_{i=1}^N f(x_i)\right)\right]^2 = \frac{1}{N-1}\sum_{i=0}^N(f(x_i) - \bar f)^2.$$
+
+### Random number generation
+The `<random>` header provides implementations of pseudo-random number generators and statistical distributions. See the following example and recall that **every process should seed
+differently its random engine**.
+Initialization:
+```cpp
+#include <random>
+#include <iostream>
+ 
+int main() {
+    std::random_device rd;  // Will be used to obtain a seed for the random number engine
+    std::mt19937 gen(rd()); // Standard mersenne_twister_engine seeded with rd()
+    std::uniform_real_distribution<> dis(1.0, 2.0);
+    for (int n = 0; n < 10; ++n) {
+        // Use dis to transform the random unsigned int generated by gen into a 
+        // double in [1, 2). Each call to dis(gen) generates a new random double
+        std::cout << dis(gen) << ' ';
+    }
+    std::cout << '\n';
+}
+```
+### Assignment
+
+Implement with MPI a parallel function to approximate definite integrals of $f: \mathbb R \rightarrow \mathbb R$ on the interval $[-1, 1] \subset \mathbb R$ with the Montecarlo method with $N$ samples. The required prototype is as follows:
+```cpp
+std::pair<double, double>
+montecarlo (const std::function<double (double)> & f, unsigned long N);
+```
+Namely it returns the pair $(Q_N, \delta Q_N^2)$, the estimated integral and its variance.
+Moreover:
+* Assume N is known only on rank zero. 
+* In order to save memory, recall that for any scalar finite succession $\{t_i\}_{i=1}^n$
+$${\frac {1}{n}}\sum _{i=1}^{n}\left(t_{i}-{\overline {t}}\right)^{2}={\frac {\sum _{i=1}^{n}t_{i}^{2}}{n}}-{\frac {\left(\sum _{i=1}^{n}t_{i}\right)^{2}}{n^{2}}}$$

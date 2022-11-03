@@ -46,7 +46,7 @@ int main(int argc, char* argv[]) {
     I = montecarlo([](auto x) { return std::sqrt(1 - x * x); }, N);
     });
   // output results
-  std::cout << "Elapsed: " << dt << std::endl;
+  std::cout << "Elapsed: " << dt << " [ms]" << std::endl;
   std::cout << "Integral: " << I.first << std::endl;
   std::cout << "Error estimator: " << std::sqrt(I.second) << std::endl;
   std::cout << "Error: " << std::abs(I.first - std::numbers::pi / 2) << std::endl;

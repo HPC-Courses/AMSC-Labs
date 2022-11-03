@@ -35,7 +35,7 @@ std::array<double, N> compute_gradient(
         // FILL HERE: we send it to proc 0
       }
       else if(/*FILL HERE: we are proc 0*/) {
-       // FILL HERE: we recieve the data
+       // FILL HERE: we receive the data
       }
     } 
   }

@@ -25,7 +25,7 @@ std::pair<double, double> montecarlo(const std::function<double(double)>& f,
 
   // broadcast the numer of samples to every proc
   if(/*FILL HERE: rank is not 0*/) {
-    // FILL HERE: recieve N
+    // FILL HERE: receive N
   } else {
     // FILL HERE: send N to each proc (that is not 0)
   }
@@ -50,7 +50,7 @@ std::pair<double, double> montecarlo(const std::function<double(double)>& f,
   if(/*FILL HERE: rank is not 0*/) {
     // FILL HERE: send sum and sum_sq to proc 0
   } else {
-    // FILL HERE: recieve sum and sum_sq from each proc and sum them together
+    // FILL HERE: receive sum and sum_sq from each proc and sum them together
   }
 
   // FILL HERE: if rank is 0 make the computations, otherwise return {0, 0}
@@ -69,7 +69,7 @@ int main(int argc, char* argv[]) {
     });
   // output results
   if (/*FILL HERE*/) {
-    std::cout << "Elapsed: " << dt << std::endl;
+    std::cout << "Elapsed: " << dt << " [ms]" << std::endl;
     std::cout << "Integral: " << I.first << std::endl;
     std::cout << "Error estimator: " << std::sqrt(I.second) << std::endl;
     std::cout << "Error: " << std::abs(I.first - std::numbers::pi / 2) << std::endl;

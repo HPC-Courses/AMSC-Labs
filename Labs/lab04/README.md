@@ -1,5 +1,5 @@
-# Exercise 1 - argc and argv, I/O syncronization
-The aim of this execise is to implement a slightly more advanced version of the standard MPI "Hello World" example. Namely it will have two features:
+# Exercise 1 - argc and argv, I/O synchronization
+The aim of this exercise is to implement a slightly more advanced version of the standard MPI "Hello World" example. Namely it will have two features:
 * The I/O is handled only by the processor with rank zero. Namely, only processor zero will use `std::cout`, the other processors will need to send the message they want to output to processor zero.
 * The "Hello world" greeting is personalized by looking at the arguments passed to the executable at run-time. Namely, if at least one extra argument is provided, it will be who we greet (e.g. "Hello Matteo"). If, on the other hand, no argument is provided, the standard "Hello world" is printed.
 
@@ -21,17 +21,17 @@ Hello, Matteo, from rank 1 of 2.
 ```
 Notice that in this way we are guaranteed that the greeting will be printed without superimposition between processors and with increasing rank values.
 
-# Exercise 2 - $n$-dimensional gradient computation
-Given the $n$-dimensional scalar field $f$
-$$f: \mathbb R^n \rightarrow \mathbb R,$$
-we want to compute its gradient at a given point $\mathbf y \in \mathbb R^n$
-$$\nabla f(\mathbf x) |_{\mathbf y } = [\partial_{x_1}f(\mathbf x)|_{y_1}, ..., \partial_{x_n}f(\mathbf x)|_{y_n}].$$
+# Exercise 2 - $N$-dimensional gradient computation
+Given the $N$-dimensional scalar field $f$
+$$f: \mathbb R^N \rightarrow \mathbb R,$$
+we want to compute its gradient at a given point $\mathbf y \in \mathbb R^N$
+$$\nabla f(\mathbf x) |_{\mathbf y } = [\partial_{x_1}f(\mathbf x)|_{y_1}, ..., \partial_{x_N}f(\mathbf x)|_{y_N}].$$
 To this end, we employ centered finite differences to approximate each component of the gradient. Namely:
 $$\partial_{x_i}f(\mathbf x)|_{y_i} \approx \frac{f(\mathbf y^+_i) - f(\mathbf y^-_i)}{2h},$$
-where $\mathbf y^+_i, \mathbf y^-_i \in \mathbb R^n$ are vectors equal to $\mathbf y$ apart from the $i$-th component, namely
-$$\mathbf y^+_i = [y_0, ..., y_{i-1}, y_i + h , y_{i+1}, ..., y_n], \quad \mathbf y^-_i = [y_0, ..., y_{i-1}, y_i - h , y_{i+1}, ..., y_n].$$
+where $\mathbf y^+_i, \mathbf y^-_i \in \mathbb R^N$ are vectors equal to $\mathbf y$ apart from the $i$-th component, namely
+$$\mathbf y^+_i = [y_0, ..., y_{i-1}, y_i + h , y_{i+1}, ..., y_N], \quad \mathbf y^-_i = [y_0, ..., y_{i-1}, y_i - h , y_{i+1}, ..., y_N].$$
 
-Implement a function (that should work irrespective of $n$)
+Implement a function (that should work irrespective of $N$)
 ```cpp
 template<size_t N>
 std::array<double, N> compute_gradient(
@@ -44,25 +44,27 @@ that given as inputs:
 * the point $\mathbf y$, `const std::array<double, N> &y`
 * the finite difference pace $h$, `double h`
 
-returns the gradient $\nabla f(\mathbf x) |_{\mathbf y }$ as `std::array<double, N>`, where each component is computed in parallel by a different processor and is then collectd by processor zero by means of `MPI_Send` and `MPI_Recv`. We can assume that $y, h$ and $N$ are already known by all processors.
+returns the gradient $\nabla f(\mathbf x) |_{\mathbf y }$ as `std::array<double, N>`, where each component is computed in parallel by a different processor and is then collected by processor zero by means of `MPI_Send` and `MPI_Recv`. We assume that $\mathbf y, h$ and $N$ are already known by all processors.
 
 # Exercise 3 - Monte Carlo integration
 
 ### Monte Carlo integration method
 The problem Monte Carlo integration addresses is the computation of a definite integral
 $$I = \int_\Omega f(x) dx$$
-where $\Omega \subset \mathbb R$ has measure $|\Omega|$
+where $\Omega \subset \mathbb R^n$ has measure $|\Omega|$
 $$|\Omega| = \int_\Omega dx.$$
 The naive Monte Carlo approach is to sample $N$ points uniformly in $\Omega$ 
 $$x_1, ..., x_N \in \Omega,$$
 and approximate $I$ as
 $$I \approx Q_N = |\Omega| \frac{1}{N}\sum_{i=1}^N f(x_i) = |\Omega| \bar f,$$
-where $\bar f$ is the average of the $f(x_i)$. Ideed, by the law of large numbers:
+where $\bar f$ is the average of the $f(x_i)$. Indeed, by the law of large numbers:
 $$\lim_{N\rightarrow+\infty} Q_N = I = \int_\Omega f(x) dx.$$
 It can be shown that the estimation of the error of $Q_N$ is
 $$\delta Q_N \approx \frac{|\Omega|}{\sqrt N} \sigma_N,$$
 where
 $$\sigma_N^2 = \frac{1}{N-1}\sum_{i=0}^N\left[f(x_i) - \left(\frac{1}{N}\sum_{i=1}^N f(x_i)\right)\right]^2 = \frac{1}{N-1}\sum_{i=0}^N(f(x_i) - \bar f)^2.$$
+
+This result does not depend on the number of dimensions of the integral, which is the advantage of Monte Carlo integration against most deterministic methods that depend exponentially on the dimension.
 
 ### Random number generation
 The `<random>` header provides implementations of pseudo-random number generators and statistical distributions. See the following example and recall that **every process should seed
@@ -86,12 +88,12 @@ int main() {
 ```
 ### Assignment
 
-Implement with MPI a parallel function to approximate definite integrals of $f: \mathbb R \rightarrow \mathbb R$ on the interval $[-1, 1] \subset \mathbb R$ with the Montecarlo method with $N$ samples. The required prototype is as follows:
+Implement with MPI a parallel function to approximate definite integrals of $f: \mathbb R \rightarrow \mathbb R$ on the interval $[-1, 1] \subset \mathbb R$ with the Monte Carlo method with $N$ samples. The required prototype is as follows:
 ```cpp
 std::pair<double, double>
 montecarlo (const std::function<double (double)> & f, unsigned long N);
 ```
-Namely it returns the pair $(Q_N, \delta Q_N^2)$, the estimated integral and its variance.
+Where the return value is the pair $(Q_N, \delta Q_N^2)$, the estimated integral and its variance.
 Moreover:
 * Assume N is known only on rank zero. 
 * In order to save memory, recall that for any scalar finite succession $\{t_i\}_{i=1}^n$

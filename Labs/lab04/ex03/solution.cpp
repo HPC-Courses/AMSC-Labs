@@ -100,7 +100,7 @@ int main(int argc, char* argv[]) {
     });
   // output results
   if (rank == 0) {
-    std::cout << "Elapsed: " << dt << std::endl;
+    std::cout << "Elapsed: " << dt << " [ms]" << std::endl;
     std::cout << "Integral: " << I.first << std::endl;
     std::cout << "Error estimator: " << std::sqrt(I.second) << std::endl;
     std::cout << "Error: " << std::abs(I.first - std::numbers::pi / 2) << std::endl;

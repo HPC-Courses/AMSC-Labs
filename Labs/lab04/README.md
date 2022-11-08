@@ -23,12 +23,19 @@ Notice that in this way we are guaranteed that the greeting will be printed with
 
 # Exercise 2 - $N$-dimensional gradient computation
 Given the $N$-dimensional scalar field $f$
+
 $$f: \mathbb R^N \rightarrow \mathbb R,$$
+
 we want to compute its gradient at a given point $\mathbf y \in \mathbb R^N$
+
 $$\nabla f(\mathbf x) |_{\mathbf y } = [\partial_{x_1}f(\mathbf x)|_{y_1}, ..., \partial_{x_N}f(\mathbf x)|_{y_N}].$$
+
 To this end, we employ centered finite differences to approximate each component of the gradient. Namely:
+
 $$\partial_{x_i}f(\mathbf x)|_{y_i} \approx \frac{f(\mathbf y^+_i) - f(\mathbf y^-_i)}{2h},$$
+
 where $\mathbf y^+_i, \mathbf y^-_i \in \mathbb R^N$ are vectors equal to $\mathbf y$ apart from the $i$-th component, namely
+
 $$\mathbf y^+_i = [y_0, ..., y_{i-1}, y_i + h , y_{i+1}, ..., y_N], \quad \mathbf y^-_i = [y_0, ..., y_{i-1}, y_i - h , y_{i+1}, ..., y_N].$$
 
 Implement a function (that should work irrespective of $N$)
@@ -97,4 +104,5 @@ Where the return value is the pair $(Q_N, \delta Q_N^2)$, the estimated integral
 Moreover:
 * Assume N is known only on rank zero. 
 * In order to save memory, recall that for any scalar finite succession $\{t_i\}_{i=1}^n$
-$${\frac {1}{n}}\sum _{i=1}^{n}\left(t_{i}-{\overline {t}}\right)^{2}={\frac {\sum _{i=1}^{n}t_{i}^{2}}{n}}-{\frac {\left(\sum _{i=1}^{n}t_{i}\right)^{2}}{n^{2}}}$$
+
+$${\frac {1}{n}}\sum_{i=1}^{n}\left(t_{i}-{\overline {t}}\right)^{2}={\frac {1}{n}\sum_{i=1}^{n}t_{i}^{2}}-{\frac {1}{n^{2}} \left(\sum_{i=1}^{n}t_{i}\right)^{2}}$$

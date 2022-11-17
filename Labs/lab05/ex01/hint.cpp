@@ -7,8 +7,8 @@
 #include "../utils.hpp"
 
 // In this version, if a and b have size `n` that is not exactly divisible
-// by the number of procs `size`, we split the vectors in chuncks of size
-// `n / size` and the remainder chunck of size `n % size` is handled by 
+// by the number of procs `size`, we split the vectors in chunks of size
+// `n / size` and the remainder chunk of size `n % size` is handled by 
 // processor zero. In this way we have a load imbalance since proc 0 has 
 // to handle more computations. However this is an occasion to showcase the 
 // use of the plain `MPI_Scatter`
@@ -36,22 +36,22 @@ double inner_product_v1(const std::vector<double>& a,
   // with `std::inner_product`
   double inner_prod_reminder /* = FILL HERE*/;
 
-  // compute the inner product of the local chunck with `std::inner_product`
+  // compute the inner product of the local chunk with `std::inner_product`
   // FILL HERE
 
-  // the inner product is just the sum of the inner products of the local chuncks, use MPI_Reduce
+  // the inner product is just the sum of the inner products of the local chunks, use MPI_Reduce
   double sum;
   // FILL HERE
   return sum;
 }
 
 // In this version, if a and b have size `n` that is not exactly divisible
-// by the number of procs `size`, we split the vectors in chuncks of size
+// by the number of procs `size`, we split the vectors in chunks of size
 // `n / size` plus 1 if the remainder `n % size` is greater than `rank`.
-// In this way we have `size` chuncks : * `n % size` chuncks of size `n / size + 1` and
-//                                      * `size - n % size` chuncks of size `n / size`
-// Since each chunck has a different size we have to employ `MPI_Scatterv` and specify
-// where each chunck begins and which is its size.
+// In this way we have `size` chunks : * `n % size` chunks of size `n / size + 1` and
+//                                      * `size - n % size` chunks of size `n / size`
+// Since each chunk has a different size we have to employ `MPI_Scatterv` and specify
+// where each chunk begins and which is its size.
 double inner_product_v2(const std::vector<double>& a,
                         const std::vector<double>& b) {
   if (a.size() != b.size()) {
@@ -70,17 +70,17 @@ double inner_product_v2(const std::vector<double>& a,
   // in this way we split the load in the most equilibrate way
   // FILL HERE
 
-  // since each chunck has a different size we have to prepare buffers with
-  // sizes and displacements of the chunck we have to send
+  // since each chunk has a different size we have to prepare buffers with
+  // sizes and displacements of the chunk we have to send
   // FILL HERE
 
-  // scatter the chuncks with MPI_Scatterv
+  // scatter the chunks with MPI_Scatterv
   // FILL HERE
 
   // compute local inner product with `std::inner_product`
   // FILL HERE
 
-  // sum togheter all local inner products, use MPI_Reduce
+  // sum together all local inner products, use MPI_Reduce
   double sum;
   // FILL HERE
   return sum;

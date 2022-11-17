@@ -19,7 +19,7 @@ void power_method(const Matrix &A, Eigen::VectorXd &b, size_t max_iter, double t
   // FILL HERE
 
   // we assume the number of rows is divisible by the number of procs
-  // compute the size of rows of A in owned by each proc, and the correspective
+  // compute the size of rows of A that is owned by each proc, and the respective
   // number of elements (if we have nrows of A, how many elements of A do we own?)
   // FILL HERE
 

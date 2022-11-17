@@ -95,10 +95,10 @@ std::vector<bool> get_primes_v5(size_t n) {
 int main() {
   const size_t n = 100'000'000;
   std::cout << "Elapsed: " << timeit([&]() { get_primes_v1(n); }) << " [ms] for naive" << std::endl;
-  std::cout << "Elapsed: " << timeit([&]() { get_primes_v2(n); }) << " [ms] for bool" << std::endl;
-  std::cout << "Elapsed: " << timeit([&]() { get_primes_v3(n); }) << " [ms] for even" << std::endl;
-  std::cout << "Elapsed: " << timeit([&]() { get_primes_v4(n); }) << " [ms] for cache" << std::endl;
-  std::cout << "Elapsed: " << timeit([&]() { get_primes_v5(n); }) << " [ms] for even+cache" << std::endl;
+  std::cout << "Elapsed: " << timeit([&]() { get_primes_v2(n); }) << " [ms] for vector-bool" << std::endl;
+  std::cout << "Elapsed: " << timeit([&]() { get_primes_v3(n); }) << " [ms] for vector-bool+avoid-even" << std::endl;
+  std::cout << "Elapsed: " << timeit([&]() { get_primes_v4(n); }) << " [ms] for vector-bool+cache-friendly" << std::endl;
+  std::cout << "Elapsed: " << timeit([&]() { get_primes_v5(n); }) << " [ms] for vector-bool+cache-friendly+avoid-even" << std::endl;
 
   return 0;
 }

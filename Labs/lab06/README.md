@@ -25,7 +25,7 @@ Hybrid application programs using MPI + OpenMP are now commonplace on large HPC 
 * introducing MPI into OpenMP applications can help scale across multiple SMP nodes;
 * introducing OpenMP into MPI applications can help make more efficient use of the shared memory on SMP nodes, thus mitigating the need for explicit intra-node communication;
 
-## Assigment
+## Assignment
 Implement the code to integrate numerically a function $f: [0, 1] \rightarrow \mathbb R$ using the Simpson quadrature method using MPI and OpenMP. Employ the following strategy:
 * Read from the arguments of the executable `argv` the number of intervals $n$ used for the numerical integration and the number `nthreads` of OpenMP threads the user intends to use.
 * Partition the interval $[0, 1]$ into `size` sub-intervals $[a_i, b_i], i = 1, ...,$ `size` so that $a_1 = 0, b_i = a_{i+1},  b_{size}=1$. 
@@ -33,4 +33,4 @@ Implement the code to integrate numerically a function $f: [0, 1] \rightarrow \m
 * The total integral will be the sum of the integrals on the partitions.
 
 # Exercise 4 (Extra) - OpenMP tasks
-`serial.cpp` provides a naive implementation of a function that builds a kd-tree. Parallelize it using OpenMP task.
+`serial.cpp` provides a naive implementation of a function `build_kdtree` that builds a [K-d tree](https://en.wikipedia.org/wiki/K-d_tree). Parallelize it using OpenMP task: in particular notice that `build_kdtree` exploits `build_kdtree_recursive` which, at each execution, make two recursive calls. Use `#pragma omp task` to make these recursive calls parallel in a way similar to the example in `/Examples/src/Parallel/OpenMP/Fibonacci`. *Hint*: remember to properly manage shared and private variables.

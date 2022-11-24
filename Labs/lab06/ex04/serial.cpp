@@ -4,8 +4,7 @@
 #include <string>
 #include <iomanip>
 #include <numeric> 
-
-#include "../../lab05/utils.hpp"
+#include <algorithm> 
 
 constexpr size_t dim = 2;
 using Point = std::array<double, dim>;
@@ -21,7 +20,6 @@ size_t build_kdtree_recursive(const std::vector<Point> &points,
   }
   if(pts_end - pts_begin == 1) {
     kdtree[*pts_begin] = {-1, -1};
-
     return *pts_begin;
   }
   const auto axis = depth % dim;
@@ -46,11 +44,9 @@ KDTree build_kdtree(const std::vector<Point> &points) {
 
 int main(int argc, char *argv[]) {
   const std::vector<Point> points = {{7, 2}, {5, 4}, {9, 6}, {4, 7}, {8, 1}, {2, 3}};
-  std::cout << "Elapsed: " << timeit([&]{
-    const auto kdtree = build_kdtree(points);
-    for(const auto &pp : kdtree)
-      std::cout << pp.first << " " << pp.second << std::endl;
-  }) << std::endl;
+  const auto kdtree = build_kdtree(points);
+  for(const auto &pp : kdtree)
+    std::cout << pp.first << " " << pp.second << std::endl;
 
   return 0;
 }

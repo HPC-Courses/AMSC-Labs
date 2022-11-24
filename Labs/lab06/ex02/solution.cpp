@@ -20,7 +20,7 @@ int main(int argc, char** argv) {
   const Matrix B = Eigen::MatrixXd::Random(n, n);
   Matrix C = Eigen::MatrixXd::Zero(n, n);
   
-  // make naive matrix mulitplication
+  // make naive matrix multiplication
   const auto t0 = high_resolution_clock::now();
   #pragma omp parallel for
   for (int i = 0; i < n; i++)
@@ -29,7 +29,7 @@ int main(int argc, char** argv) {
         C.coeffRef(i, j) += A.coeffRef(i, k) * B.coeffRef(k, j);
   const auto t1 = high_resolution_clock::now();
   const auto dt = duration_cast<milliseconds>(t1 - t0).count();
-  std::cout << "Elapsed mm by hand: " << dt << " [ms]\n";
+  std::cout << "Elapsed mm naive: " << dt << " [ms]\n";
 
   // check result is correct
   const auto t2 = high_resolution_clock::now();

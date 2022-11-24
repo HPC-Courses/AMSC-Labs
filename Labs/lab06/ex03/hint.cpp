@@ -56,7 +56,7 @@ int main(int argc, char** argv) {
   const auto n_local /*= FILL HERE*/;
   // size of the partition of the interval [0, 1], you can use equal sized partitions
   const auto local_interval_size /*= FILL HERE*/;
-  // start of the patition for this proc
+  // start of the partition for this proc
   const auto a_local /*= FILL HERE*/;
 
   // compute the integral and measure elapsed time

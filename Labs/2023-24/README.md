@@ -1,6 +1,6 @@
 # Lab sessions
 
-## Schedule: Thursday 9:30 - 11:00, room T.0.3
+## Schedule: Friday 9:30 - 11:00, room T.0.3
 
 ## Webex room: [https://politecnicomilano.webex.com/meet/matteo.caldana](https://politecnicomilano.webex.com/meet/matteo.caldana)
 

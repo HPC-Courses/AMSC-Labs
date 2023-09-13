@@ -32,8 +32,8 @@ The mk modules are natively available **only for (reasonably modern) Linux distr
 
 #### 2.1.1 How it works
 The two most important terms when it comes to `Docker` are **image** and **container**. 
-- Images are blueprints of VMs and define the environment as a frozen snapshot in time (think of it as a frozen meal, all properties are conserved, but before eating it you have to defrost it). 
-- Containers are instances of images (the meal ready to be eaten). 
+- Images are blueprints of VMs and define the environment as a frozen snapshot in time. 
+- Containers are instances of images.
 
 We provide you the image with everything that you need (a Linux OS (Ubuntu) with the mk modules installed), so what you need to do is just to build a container. This container will then serve as our development environment: we can launch our shell in it, mount local folders to it, etc. We usually call the machine on which Docker is installed (the one with MacOS) the **host** and the operating system running *inside* the container the **guest**.
 

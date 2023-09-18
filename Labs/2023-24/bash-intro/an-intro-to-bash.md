@@ -204,11 +204,11 @@ or
 ---
 
 ### Wildcards
-A wildcard is a symbol (or set of symbols) representing other characters. It is really useful for searching a file (maybe you know just its extension) or listing a subset of files in a folder (maybe you want to display only files starting with `2023-`).
+A wildcard is a character (or set of characters) that in a command matches one or more characters. It is really useful for searching a file (maybe you know just its extension) or applying a command to a subset of files (maybe you want to copy only files starting with `2023-`).
 
-- The wildcard `?` means it will match a single character. For example, `S??` n will match anything that will begin with S and end with n and has two characters between them.
-- The wildcard `*` means it will match any number of characters or a set of characters. For example, `S**n` will match anything between S and n. The number of characters between them does not count.
-- The wildcard `[]` means it will match characters that are enclosed in square braces. For example, `S[on]n` will match only `Son` and `Snn`. We can also specify characters in braces like `S[a-d]n`, which will match `San`, `Sbn`, `Scn`, `Sdn`.
+- The wildcard `?` matches a single character. E.g., `S??n` will match anything that begins with S and end with n and has exactly two characters between them. It matches `Soon` and `Sean` but not `Sin`. 
+- The wildcard `*` matches any number of characters or a set of characters. E.g., `S*n` will match anything between S and n. The number of characters between them does not count. It matches `Soon`, `Sean` and `Sin`.
+- The wildcard `[]` matches characters that are enclosed in the square braces. E.g., `S[on]n` matches only `Son` and `Snn`. We can also specify range of characters with the `-` character. E.g., braces like `S[a-d]n` match `San`, `Sbn`, `Scn`, `Sdn`.
 
 ---
 

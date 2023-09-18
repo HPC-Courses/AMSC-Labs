@@ -55,6 +55,23 @@ The **prompt** can be customized (more on that later).
 
 ---
 
+## Moving quickly in the Terminal (1/2)
+It should almost never happen that you have to write a terminal command by typing it out character by character. Instead, you should rely on shortcuts to be more efficient. Here some tips:
+
+- `Tab`: Auto-completes commands and paths. E.g. if in the current folder there are the files `main.cpp` and `test.cpp`, if you type `g++ m` and press `Tab`, it will auto-complete to `g++ main.cpp`.
+- `Up` and `Down` arrows: Slide through previous commands.
+- `Ctrl + R`: Start a incremental reverse search of your bash history. In other words it finds the last complete command that you executed that starts with what you are typing.
+- `Ctrl + L`: Similar to `clear` command, clears the terminal screen
+
+
+---
+
+## Moving quickly in the Terminal (2/2) <span style="color:red;float:right">(Advanced)</span>
+![width:1200](./assets/moving_cli.png)
+
+
+---
+
 ### `Bash` as a command line interpreter
 When launching a terminal a Unix system first launches the shell interpreter specified in the `SHELL` **environment variable**. If `SHELL` is unset it uses the system default.
 

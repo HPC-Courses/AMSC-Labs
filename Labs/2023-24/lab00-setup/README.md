@@ -202,3 +202,71 @@ g++ -I ${mkEigenInc} test-installation.cpp -o test-installation
 ./test-installation
 ```
 
+
+## 4. Set up Visual Studio Code
+As you may have noticed, VS Code linter raises an error like the following when including Eigen. 
+![Eigen error](./assets/eigen-error.png)
+
+This is caused by the fact that the Eigen library (contained in the mk modules) is in a place (path) where usually the compiler never looks. Since we will always compile from command line, and manually specify where the compiler should look for the libraries (with the `-I` option) this is not an issue, and this section is completely optional. However, if you want to fix this problem keep on reading.
+
+### 4.1 Requirements
+If you are not on Linux you need first to download a VS Code extension to have complete integration with WSL/Docker. You can seach for extesions by clicking of the left of your screen.
+**After these steps it might be needed to re-install the "C\C++" extension inside the VS Code instance that is connected to WSL/Docker.**
+
+![Extensions](./assets/extensions.png)
+
+#### 4.1.1 WSL
+For WSL you need the "WSL" extension
+
+![WSL extension](./assets/WSL-ext.png)
+
+After installing it, to use it press `F1`, it should open a bar on top where you should find the command (by typing it) "Connect to WSL".
+
+![WSL connect](./assets/WSL-F1.png)
+
+It should open a new instace of VS Code connected to the WSL (the first time it may take a while). 
+Here you can open and work in any folder of the WSL.
+
+#### 4.1.2 Docker
+For Docker you need the "Dev Containers" extension
+
+![Docker extension](./assets/Docker-ext.png)
+
+After installing it, to use it press `F1`, it should open a bar on top where you should find the command (by typing it) "Attach to a running container" (before using it you have to `docker start hpc-env`).
+
+![Docker connect](./assets/Docker-F1.png)
+![Docker connect](./assets/Docker-F1-pt2.png)
+
+It should open a new instace of VS Code connected to the Docker (the first time it may take a while). 
+Here you can open and work in any folder of the Docker container.
+
+### 4.2 Modify the `includePath`
+The last step is to update where to look for the files that we are including.
+First open the folder where you want to work.
+**Beware that this configuration change will affect only this folder**
+Click on the lightbulb (you may need to click on that line to make it appear) and than on `Edit "includePath" settings`.
+
+![Lightbulb](./assets/lightbulb-edit-include-path.png)
+
+Put `/u/sw/toolchains/gcc-glibc/11.2.0/prefix/bin/g++` as "Compiler path".
+
+![Update compiler](./assets/config-compiler.png)
+
+Add
+```
+/u/sw/toolchains/gcc-glibc/11.2.0/base/include
+/u/sw/toolchains/gcc-glibc/11.2.0/pkgs/eigen/3.3.9/include/eigen3
+/u/sw/toolchains/gcc-glibc/11.2.0/pkgs/lis/2.0.30/include
+/u/sw/toolchains/gcc-glibc/11.2.0/pkgs/dealii/9.3.1/include
+```
+to the "Include path".
+Set "C++ standard" to "c++20".
+
+![Update include path](./assets/config-include-std.png)
+
+Now, going back to our file, the include path should be clickable (while pressing `Ctrl`)
+
+![Click Eigen](./assets/path-click.png)
+![Click Eigen](./assets/path-click-pt2.png)
+
+

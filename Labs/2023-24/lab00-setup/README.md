@@ -210,7 +210,7 @@ As you may have noticed, VS Code linter raises an error like the following when 
 This is caused by the fact that the Eigen library (contained in the mk modules) is in a place (path) where usually the compiler never looks. Since we will always compile from command line, and manually specify where the compiler should look for the libraries (with the `-I` option) this is not an issue, and this section is completely optional. However, if you want to fix this problem keep on reading.
 
 ### 4.1 Requirements
-If you are not on Linux you need first to download a VS Code extension to have complete integration with WSL/Docker. You can seach for extesions by clicking of the left of your screen.
+If you are not on Linux you need first to download a VS Code extension to have complete integration with WSL/Docker. You can search for extensions by clicking of the left of your screen.
 **After these steps it might be needed to re-install the "C\C++" extension inside the VS Code instance that is connected to WSL/Docker.**
 
 ![Extensions](./assets/extensions.png)
@@ -224,7 +224,7 @@ After installing it, to use it press `F1`, it should open a bar on top where you
 
 ![WSL connect](./assets/WSL-F1.png)
 
-It should open a new instace of VS Code connected to the WSL (the first time it may take a while). 
+It should open a new instance of VS Code connected to the WSL (the first time it may take a while). 
 Here you can open and work in any folder of the WSL.
 
 #### 4.1.2 Docker
@@ -237,7 +237,7 @@ After installing it, to use it press `F1`, it should open a bar on top where you
 ![Docker connect](./assets/Docker-F1.png)
 ![Docker connect](./assets/Docker-F1-pt2.png)
 
-It should open a new instace of VS Code connected to the Docker (the first time it may take a while). 
+It should open a new instance of VS Code connected to the Docker (the first time it may take a while). 
 Here you can open and work in any folder of the Docker container.
 
 ### 4.2 Modify the `includePath`

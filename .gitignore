@@ -30,3 +30,13 @@
 *.exe
 *.out
 *.app
+
+# Latex
+*.snm
+*.nav
+*.log
+*.aux
+*.toc
+*.vrb
+
+

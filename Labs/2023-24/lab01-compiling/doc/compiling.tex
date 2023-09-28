@@ -13,7 +13,7 @@
 
 
 \begin{document}
-  \title{Compiling}
+  \title{Lab01 - Compiling}
   \author{Matteo Caldana}
   \date{28/09/2023}
     
@@ -89,19 +89,9 @@ When you launch the executable, you have an additional step:
 \end{frame}
 
 \begin{frame}{The compilation steps (simplified)}
-  \centerline{\includegraphics[width=0.85\textwidth]{compile_steps}}
+  \centerline{\includegraphics[width=0.99\textwidth]{compile_steps}}
 \end{frame}
 
-
-\begin{frame}
-  \centering
-  \Large
-  \color{blue} Let's try this on a Hello World
-% main 
-% main -> object + link
-% main + definition -> link error
-% main + definition + declaration -> ok
-\end{frame}
 
 \frame{
 \frametitle{What should a header file contain}
@@ -204,22 +194,26 @@ g++ -std=c++20 -o main main.o a.o b.o
 
 \begin{frame}[fragile]{All in one go}
 	Of course it is possible to do all in one go
-\begin{verbatim}
-g++ -std=c++20 main.cpp a.cpp b.cpp -o main
-\end{verbatim}	
-But it is normally better to keep compilation and linking stages separate. If you modify \texttt{a.cpp} you have
-to recompile only \texttt{a.o} and repeat the linking.
-\smallskip
+  \begin{verbatim}
+  g++ -std=c++20 main.cpp a.cpp b.cpp -o main
+  \end{verbatim}	
+  But it is normally better to keep compilation and linking stages separate. If you modify \texttt{a.cpp} you have
+  to recompile only \texttt{a.o} and repeat the linking.
+  \smallskip
 
-Note however, that the compiler will in any case treat the translation units \texttt{a.cpp}, \texttt{b.cpp} and \texttt{main.cpp} separately.
+  Note however, that the compiler will in any case treat the translation units \texttt{a.cpp}, \texttt{b.cpp} and \texttt{main.cpp} separately.
 
 
-\medskip
+  \medskip
 
-Let's look at the 3 stages in more detail.
-	\end{frame}
- 
+  Let's look at the 3 stages in more detail.
+\end{frame}
 
+\begin{frame}
+  \centering
+  \Large
+  \color{blue} Let's try this on a Hello World
+\end{frame}
  
 \frame{ \frametitle{The preprocessor} 
 
@@ -628,5 +622,12 @@ the executable for later use by the loader.
     
   \end{frame}
 
+  \begin{frame}
+    \centering
+    \Large
+    \color{blue} Let's try this on a Hello World
+  \end{frame}
+
 \end{document}
+
 

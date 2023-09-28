@@ -39,4 +39,6 @@
 *.toc
 *.vrb
 
+# IDEs
+.vscode
 

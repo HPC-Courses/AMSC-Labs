@@ -8,7 +8,7 @@
 class Shape {
 public:
     Shape() = default;
-    virtual double getArea() = 0;
+    virtual double getArea() const = 0;
     // the advantage of this version w.r.t. the other is that we exploit
     // static memory, in this way classes consume less memory and the name
     // is 'embedded' at compile time into the class.
@@ -21,7 +21,7 @@ public:
 class Circle : public Shape {
 public:
     Circle(double radius) : Shape(), m_radius(radius) {};
-    virtual double getArea() override { return m_radius * m_radius * std::numbers::pi_v<double>; };
+    virtual double getArea() const override { return m_radius * m_radius * std::numbers::pi_v<double>; };
     constexpr virtual const char *getName() override { return "Circle"; };
     virtual ~Circle() override = default;
 private:
@@ -31,7 +31,7 @@ private:
 class Rectangle : public Shape {
 public:
     Rectangle(double b, double h) : Shape(), m_basis(b), m_height(h) {};
-    virtual double getArea() override { return m_basis * m_height; };
+    virtual double getArea() const override { return m_basis * m_height; };
     constexpr virtual const char *getName() override { return "Rectangle"; };
     virtual ~Rectangle() override = default;
 private:

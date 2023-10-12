@@ -8,7 +8,7 @@
 class Shape {
 public:
     Shape(const std::string& name) : m_name(name) {};
-    virtual double getArea() = 0;
+    virtual double getArea() const = 0;
     const std::string& getName() const { return m_name; };
     // always make base classes' destructors virtual when they're meant to be manipulated polymorphically.
     virtual ~Shape() = default;
@@ -19,7 +19,7 @@ private:
 class Circle : public Shape {
 public:
     Circle(double radius) : Shape("Circle"), m_radius(radius) {};
-    virtual double getArea() override { return m_radius * m_radius * std::numbers::pi_v<double>; };
+    virtual double getArea() const override { return m_radius * m_radius * std::numbers::pi_v<double>; };
     virtual ~Circle() override = default;
 private:
     const double m_radius;
@@ -28,7 +28,7 @@ private:
 class Rectangle : public Shape {
 public:
     Rectangle(double b, double h) : Shape("Rectangle"), m_basis(b), m_height(h) {};
-    virtual double getArea() override { return m_basis * m_height; };
+    virtual double getArea() const override { return m_basis * m_height; };
     virtual ~Rectangle() override = default;
 private:
     const double m_basis, m_height;

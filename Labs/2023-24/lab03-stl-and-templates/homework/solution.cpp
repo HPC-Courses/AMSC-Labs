@@ -37,7 +37,7 @@ int main() {
       "you",    "fear",   "in",   "a",      "handful", "of",        "dust"};
   std::map<std::string, size_t> word_count;
   for (const auto& w : words) {
-    // the trick here is that s soon as you access the map with the [] operator, 
+    // the trick here is that as soon as you access the map with the [] operator, 
     // if the key doesn't exist it gets added. The int gets "value initialization" 
     // invoked - so it will get a value of 0.
     word_count[w]++;

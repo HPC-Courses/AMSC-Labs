@@ -159,12 +159,24 @@ private:
   // utility to find element among the data
   // if we keep the Vector sorted we can find the element in O(log nnz) with std::lower_bound
   // instead of O(nnz) when using std::find_if
-  std::vector<ijv_t>::const_iterator find_elem(size_t i, size_t j) const {
+  typename std::vector<ijv_t>::const_iterator find_elem(size_t i, size_t j) const {
     const auto it = std::lower_bound(
       m_data.begin(),
       m_data.end(),
+      // we are interested only in (i, j), not in the value of the tuple.
+      // we use a trick to exploit the default lexicograpic ordering of the tuple
       std::make_tuple(i, j, std::numeric_limits<T>::lowest())
     );
+    /// this is instead the 'explicit' version, where we define a custom ordering 
+    /// instead of exploiting the default one
+    // std::lower_bound(
+    //   m_data.begin(),
+    //   m_data.end(),
+    //   std::make_pair(i, j),
+    //   [](const ijv_t& x, const auto& value) {
+    //     return (std::get<0>(x) < value.first) || ((std::get<0>(x) == value.first) && (std::get<1>(x) < value.second));
+    //   }
+    // );
     if( (it == m_data.cend()) || (std::get<0>(*it) != i) || (std::get<1>(*it) != j) ) {
       std::cerr << "Error: accessing an element of a COO matrix that is not present" << std::endl;
       std::exit(-1);

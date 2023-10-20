@@ -112,15 +112,6 @@ bool eq(const std::vector<T>& lhs, const std::vector<T>& rhs) {
   return true;
 }
 
-// time a function execution time
-auto timeit(const std::function<void()>& f) {
-  using namespace std::chrono;
-  const auto t0 = high_resolution_clock::now();
-  f();
-  const auto t1 = high_resolution_clock::now();
-  return duration_cast<milliseconds>(t1 - t0).count();
-}
-
 // utility for printing the result of a test
 void print_test_result(bool r, const std::string& test_name) {
   std::cout << test_name << " test: " << (r ? "PASSED" : "FAILED") << std::endl;

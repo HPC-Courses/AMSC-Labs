@@ -33,6 +33,7 @@ This makes your code much faster, but rarely may cause issues due to the modifie
 Finally we want to implement some utilities to benchmark the performances of our class and test if the implementation is correct. Namely we implement:
 
 * a function to fill a matrix and given the final size $n$. Namely it puts on the main diagonal -2 and 1 on the diagonal above and below the main one
+
 $$
 A=
 \begin{bmatrix}
@@ -44,15 +45,16 @@ A=
 0 & \dots & 0 & 0 & 1 & -2 \\\
 \end{bmatrix}
 $$
+
 * a function `bool eq(const Vector &lhs, const Vector &rhs)` that checks if two vectors are equal
 
 Then we will check that `matrix.print(std::cout)` effectively prints the expected tri-diagonal matrix that we expect and that the matrix-vector multiplication is correct using the test
+
 $$
 A 
 \begin{bmatrix}
 0 \\\ 1 \\\ 2 \\\ \vdots \\\ n-1 \\\ n
-\end{bmatrix} 
-= 
+\end{bmatrix} =
 \begin{bmatrix}
 1 \\\ 0 \\\ 0 \\\ \vdots \\\ 0 \\\ -n
 \end{bmatrix}

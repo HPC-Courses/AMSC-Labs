@@ -13,9 +13,6 @@
 #include <functional>
 #include <array>
 
-using elem_t = double;
-using Vector = std::vector<elem_t>;
-
 template<typename T>
 class SparseMatrix {
 public:
@@ -56,7 +53,7 @@ public:
     return res;
   }
 
-  virtual double& operator()(size_t i, size_t j) override {
+  virtual T& operator()(size_t i, size_t j) override {
     if (m_data.size() < i + 1) {
       m_data.resize(i + 1);
       SparseMatrix<T>::m_nrows = i + 1;
@@ -69,7 +66,7 @@ public:
     }
     return (*it).second;
   }
-  virtual const double& operator()(size_t i, size_t j) const override {
+  virtual const T& operator()(size_t i, size_t j) const override {
     return m_data[i].at(j);
   }
   virtual ~MapMatrix() override = default;
@@ -137,7 +134,7 @@ int main() {
     std::cout << "Elapsed for element access: " << dt_insert << "[ms]" << std::endl;
   }
 
-  Vector b;
+  SparseMatrix<elem_t>::Vector b;
   {
     using namespace std::chrono;
     const auto t0 = high_resolution_clock::now();

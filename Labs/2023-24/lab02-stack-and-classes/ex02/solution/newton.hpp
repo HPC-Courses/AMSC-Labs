@@ -17,53 +17,53 @@ public:
     const double tol_x_ = std::numeric_limits<double>::epsilon()
   )
     :
-    fun(fun_),
-    dfun(dfun_),
-    n_max_it(n_max_it_),
-    tol_fun(tol_fun_),
-    tol_x(tol_x_),
-    x(0),
-    df_dx(0),
-    dx(0),
-    res(0),
-    iter(0) {
+    m_fun(fun_),
+    m_dfun(dfun_),
+    m_n_max_it(n_max_it_),
+    m_tol_fun(tol_fun_),
+    m_tol_x(tol_x_),
+    m_x(0),
+    m_df_dx(0),
+    m_dx(0),
+    m_res(0),
+    m_iter(0) {
   }
 
   void solve(const double x0);
 
   double getResult() const {
-    return x[x.size() - 1];
+    return m_x.back();
   };
 
   double getStep() const {
-    return dx;
+    return m_dx;
   };
 
   const std::vector<double>& getHistory() const {
-    return x;
+    return m_x;
   }
 
   double getResidual() const {
-    return res;
+    return m_res;
   };
 
   unsigned int getIter() const {
-    return iter;
+    return m_iter;
   };
 
 private:
-  std::function<double(double)> fun;
-  std::function<double(double)> dfun;
+  std::function<double(double)> m_fun;
+  std::function<double(double)> m_dfun;
 
-  const unsigned int n_max_it;
-  const double       tol_fun;
-  const double       tol_x;
+  const unsigned int m_n_max_it;
+  const double       m_tol_fun;
+  const double       m_tol_x;
 
-  std::vector<double> x;
-  double              df_dx;
-  double              dx;
-  double              res;
-  unsigned int        iter;
+  std::vector<double> m_x;
+  double              m_df_dx;
+  double              m_dx;
+  double              m_res;
+  unsigned int        m_iter;
 };
 
 #endif /* NEWTON_H */

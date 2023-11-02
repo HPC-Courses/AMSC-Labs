@@ -79,3 +79,15 @@ In the folder `homework` you are provided with a simple program composed by a so
 1. **Compile-time error**: errors that appear when you try to compile the code and are caused by a wrong sintax
 2. **Run-time error**: errors that will make your executable go in segmentation fault when you try to run it
 3. **Memory leak**: on the surface the code will look like as everything is fine, but under the hood there is a memory leak. To check for its presence you can use the `--tool=memcheck` option of Valgrind
+
+# Extra - More on struct memory alignment
+In the folder `extra-padding` we provide a more advanced example on struct memory alignment where you can see in action the `#pragma pack` preprocessor directive and how it affects to memory alignment. In particular, we provide a measure of the following statistics:
+- Size in memory
+- Speed of allocation
+- Speed of write
+- Speed of read
+
+We suggest to compile the code with 
+```bash
+g++ main.cpp -Wall -Wextra -O3 -o main 
+```

@@ -88,20 +88,26 @@ void test_allocate_write_read() {
   const auto dt = duration_cast<milliseconds>(t1 - t0).count();
   const auto start = reinterpret_cast<uintptr_t>(&elements[0]);
   const auto end = reinterpret_cast<uintptr_t>(&elements.back());
-  const auto size = (end - start + 1ull) / 1024ull / 1024ull;
+  const auto size = (end - start + sizeof(Struct)) / 1e6;
   std::cout << "Allocation took: " << dt << " [ms] for: " << size << " [MB]"
             << std::endl;
-  const auto speed = double(size) * (1.0e3 / 1024.0) / double(dt);
+  const auto speed = static_cast<double>(size) / static_cast<double>(dt);
   std::cout << "Allocation speed: " << speed << " [GB/s]" << std::endl;
 
   // random engine to test writing/reading random numbers
   std::default_random_engine engine(std::random_device{}());
   std::uniform_int_distribution<int> rand_int(1, 10);
+  std::uniform_int_distribution<char> rand_char(1, 10);
+  std::uniform_int_distribution<short int> rand_short(1, 10);
 
   // test write speed
   {
     const auto t0 = high_resolution_clock::now();
-    for (auto &e : elements) e.i = rand_int(engine);
+    for (auto &e : elements) {
+      e.i = rand_int(engine);
+      e.c = rand_char(engine);
+      e.s = rand_short(engine);
+    }
     const auto t1 = high_resolution_clock::now();
     const auto dt = duration_cast<milliseconds>(t1 - t0).count();
     std::cout << "Write time: " << dt << " [ms]" << std::endl;
@@ -109,12 +115,18 @@ void test_allocate_write_read() {
 
   // test read speed
   {
-    int sum = 0;
+    int i = 0;
+    char c = 0;
+    short int s = 0;
     const auto t0 = high_resolution_clock::now();
-    for (auto &e : elements) sum += e.i;
+    for (const auto &e : elements) {
+      i += e.i;
+      c += e.c;
+      s += e.s;
+    }
     const auto t1 = high_resolution_clock::now();
     const auto dt = duration_cast<milliseconds>(t1 - t0).count();
-    std::cout << "Read time: " << dt << " [ms] " << sum << std::endl;
+    std::cout << "Read time: " << dt << " [ms] " << i + c + s << std::endl;
   }
 }
 

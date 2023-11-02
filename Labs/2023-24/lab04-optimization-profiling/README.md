@@ -17,7 +17,7 @@ valgrind --tool=callgrind --dump-instr=yes --collect-jumps=yes ./main
 
 To visualize (in a nice graphical way) the results of the profiling done with Valgrind, we use KCacheGrind. You can obtain it in the following ways:
 
-- Linux or WSL with GUI (graphical interface inside WSL): run `sudo apt-get install kcachegrind`
+- Linux or [WSL with GUI](https://learn.microsoft.com/en-us/windows/wsl/tutorials/gui-apps) (graphical interface inside WSL): run `sudo apt-get install kcachegrind`
 - Windows (on the host machine): install [QCacheGrind port for windows](https://sourceforge.net/projects/qcachegrindwin/) 
 - MacOs (on the host machine): run the following commands `brew update`, `brew install qcachegrind`
 

@@ -9,11 +9,12 @@ using Matrix = Eigen::Matrix<double, -1, -1, Eigen::RowMajor>;
 
 int main(int argc, char** argv) {
   // parse inputs
-  if (argc != 2) {
-    std::cerr << "Usage: " << argv[0] << "  matrix size\n";
+  if (argc != 3) {
+    std::cerr << "Usage: " << argv[0] << "  num-threads matrix-size \n";
     std::exit(EXIT_FAILURE);
   }
-  const auto n = atoi(argv[1]);
+  const auto num_threads = std::atoi(argv[1]);
+  const auto n = std::atoi(argv[2]);
 
   // initialize matrices
   const Matrix A = Eigen::MatrixXd::Random(n, n);
@@ -22,7 +23,8 @@ int main(int argc, char** argv) {
 
   // make naive matrix multiplication
   const auto t0 = high_resolution_clock::now();
-#pragma omp parallel for
+
+#pragma omp parallel for num_threads(num_threads)
   for (int i = 0; i < n; i++)
     for (int k = 0; k < n; k++)
       for (int j = 0; j < n; j++)

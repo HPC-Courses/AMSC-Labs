@@ -6,6 +6,7 @@
 #include <functional>
 #include <iomanip>
 #include <iostream>
+#include <numbers>
 #include <tuple>
 #include <vector>
 
@@ -37,14 +38,21 @@ int main(int argc, char** argv) {
               << " number-of-intervals number-of-threads\n";
     std::exit(EXIT_FAILURE);
   }
-  const auto n = atoi(argv[1]);
-  const auto nthreads = atoi(argv[2]);
+  const auto n = std::atoi(argv[1]);
+  const auto nthreads = std::atoi(argv[2]);
 
   // initialize MPI
-  MPI_Init(&argc, &argv);
+  int provided;
+  MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &provided);
   int rank, size;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+  if (rank == 0) {
+    std::cout << "Provided parallelization lvl: " << provided << std::endl;
+    std::cout << "# OpenMP threads: " << nthreads << std::endl;
+    std::cout << "# MPI procs: " << size << std::endl;
+  }
 
   // notice that differently from the other labs we assume that all
   // processors know  the total number of intervals and that we are
@@ -73,7 +81,8 @@ int main(int argc, char** argv) {
   if (rank == 0) {
     std::cout << std::setprecision(16);
     std::cout << "Integral value: " << integral << "\n";
-    std::cout << "Error: " << std::abs(integral * 4.0 - M_PI) << "\n";
+    std::cout << "Error: " << std::abs(integral * 4.0 - std::numbers::pi)
+              << "\n";
     std::cout << "Elapsed:" << dt << " [ms]\n";
   }
   MPI_Finalize();

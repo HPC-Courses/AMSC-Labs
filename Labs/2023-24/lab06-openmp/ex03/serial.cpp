@@ -23,8 +23,8 @@ int main(int argc, char** argv) {
   // make naive matrix multiplication
   const auto t0 = high_resolution_clock::now();
   for (int i = 0; i < n; i++)
-    for (int k = 0; k < n; k++)
-      for (int j = 0; j < n; j++)
+    for (int j = 0; j < n; j++)
+      for (int k = 0; k < n; k++)
         C.coeffRef(i, j) += A.coeffRef(i, k) * B.coeffRef(k, j);
   const auto t1 = high_resolution_clock::now();
   const auto dt = duration_cast<milliseconds>(t1 - t0).count();

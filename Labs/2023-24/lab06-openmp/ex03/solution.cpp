@@ -21,13 +21,16 @@ int main(int argc, char** argv) {
   const Matrix B = Eigen::MatrixXd::Random(n, n);
   Matrix C = Eigen::MatrixXd::Zero(n, n);
 
+  omp_set_num_threads(num_threads);
+  std::cout << "Number of threads: " << num_threads << std::endl;
+
   // make naive matrix multiplication
   const auto t0 = high_resolution_clock::now();
 
-#pragma omp parallel for num_threads(num_threads)
+#pragma omp parallel for
   for (int i = 0; i < n; i++)
-    for (int k = 0; k < n; k++)
-      for (int j = 0; j < n; j++)
+    for (int j = 0; j < n; j++)
+      for (int k = 0; k < n; k++)
         C.coeffRef(i, j) += A.coeffRef(i, k) * B.coeffRef(k, j);
   const auto t1 = high_resolution_clock::now();
   const auto dt = duration_cast<milliseconds>(t1 - t0).count();

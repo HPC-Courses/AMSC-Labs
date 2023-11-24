@@ -1,3 +1,4 @@
+#include <mpi.h>
 #include <omp.h>
 
 #include <chrono>
@@ -9,8 +10,6 @@
 #include <numbers>
 #include <tuple>
 #include <vector>
-
-#include "mpi.h"
 
 using namespace std::chrono;
 

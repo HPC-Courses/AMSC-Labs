@@ -59,7 +59,7 @@ To use your image you need to create a Docker container. To make a parallel with
 docker run --name hpc-env -v /path/to/host/folder:/home/jellyfish/shared-folder -it -d pcafrica/mk
 ```
 
-**WARNING:** Could be that recent versions of Mac have the following issue `WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested`. TO solve this problem substitute the command above with `docker run --platform linux/amd64 --name hpc-env -v /path/to/host/folder:/home/jellyfish/shared-folder -it -d pcafrica/mk`
+**WARNING:** Could be that recent versions of Mac have the following issue `WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested`. To solve this problem substitute the command above with `docker run --platform linux/amd64 --name hpc-env -v /path/to/host/folder:/home/jellyfish/shared-folder -it -d pcafrica/mk`
 
 **WARNING:** you have to substitute `/path/to/host/folder` with the actual name of the path on your laptop, for instance `/home/matteo/polimi/amsc23-24/shared-folder`
 
@@ -271,4 +271,15 @@ Now, going back to our file, the include path should be clickable (while pressin
 ![Click Eigen](./assets/path-click.png)
 ![Click Eigen](./assets/path-click-pt2.png)
 
+### 4.3 Docker fix possible bux fixes
+From the terminal inside the Docker machine type,
+```bash
+vim $HOME/.bashrc
+```
+then go to the end of the file and paste the following commands,
+```bash
+export OMPI_ALLOW_RUN_AS_ROOT=1
+export OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
+export OMPI_MCA_btl_vader_single_copy_mechanism=none
+```
 

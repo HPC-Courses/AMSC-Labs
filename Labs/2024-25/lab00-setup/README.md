@@ -281,5 +281,16 @@ then go to the end of the file and paste the following commands,
 export OMPI_ALLOW_RUN_AS_ROOT=1
 export OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
 export OMPI_MCA_btl_vader_single_copy_mechanism=none
+
+# own PS1
+export PS1='\[$(tput bold)\]\[$(tput setaf 1)\]\u@\h\[$(tput setaf 4)\] \W \$\[$(tput sgr0)\] '
+
+# avoid the -I flag when compiling
+export CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:/u/sw/toolchains/gcc-glibc/11.2.0/pkgs/eigen/3.3.9/include/eigen3
+```
+
+Do not forget to type at the end (once you go out from the vim editor)
+```bash
+source $HOME/.bashrc
 ```
 

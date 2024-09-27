@@ -2,10 +2,10 @@ CXX = g++
 OPENMPFLAG = #-fopenmp
 OPENMPLINKINGFLAG =
 LIBS = #-Linclude/lis-2.0.32/BUILD/lib -llis
-CXXFLAGS = -std=c++20 -O2 -fpic #-g
-CPPFLAGS = #-DNDEBUG 
+CXXFLAGS = -std=c++20 -O2 -fpic  #-g
+CPPFLAGS = -I../include #-DNDEBUG
 PROGRAM = main
-OBJ = main.o #utils_H.o
+OBJ = main.o exe.o
 
 
 

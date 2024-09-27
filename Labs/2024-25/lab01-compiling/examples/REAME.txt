@@ -1,0 +1,19 @@
+in the src folder, if you already have Eigen in the compiler path, simply type
+```bash
+make
+```
+if you want a faster building, type
+```bash
+make -j
+```
+To see if Eigen is in the -I path, check the env variable CPLUS_INCLUDE_PATH,
+if it is not in the path, add it by typing
+```bash
+export CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:/u/sw/toolchains/gcc-glibc/11.2.0/pkgs/eigen/3.3.9/include/eigen3"
+```
+
+To rm the *.o files,
+```bash
+make clean
+```
+

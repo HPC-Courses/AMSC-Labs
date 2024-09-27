@@ -17,3 +17,7 @@ To rm the *.o files,
 make clean
 ```
 
+the program once built needs two input two execute, provide two number basically, e.g.,
+```bash
+./main.exe 3 2
+```

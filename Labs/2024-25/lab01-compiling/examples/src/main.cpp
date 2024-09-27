@@ -15,8 +15,6 @@ int main(int argc, char** argv)
             << "please provide just two inputs '"
             ).str()
             );
-
-        std::cerr << "please provide just two inputs " << argv[1] << std::endl;
     }
     #ifdef M_PI
     std::cout << "here inside" << std::endl;

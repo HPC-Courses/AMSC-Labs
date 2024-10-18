@@ -1,6 +1,9 @@
 # Prerequisites
 *.d
 
+# Mac DStore
+*.DS_Store
+
 # Compiled Object files
 *.slo
 *.lo

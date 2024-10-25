@@ -13,6 +13,26 @@
 #include <functional>
 #include <array>
 
+struct event_counter
+{
+  double cumtime;
+  int    count;
+};
+
+static clock_t c_start, c_diff;
+static double c_msec;
+static std::map<std::string,event_counter> timing_report;
+
+#define tic() c_start = clock ();
+
+#define toc(X)                                                \
+  c_diff = clock () - c_start;                                \
+  c_msec = (double)c_diff * 1000 / (double)CLOCKS_PER_SEC;    \
+  timing_report[X].cumtime += c_msec;                         \
+  timing_report[X].count++;                                   \
+  std::cout << X << std::endl << "Elapsed time : " << c_msec  \
+    << "ms" << std::endl;    
+
 
 // *use templates to make your matrix usable with different types
 // *just like an std::vector can contain different elements, depending on
@@ -20,28 +40,34 @@
 template<typename T>
 class SparseMatrix {
 public:
-// *constructor, takes no parameters but initializes: number of non-zero elements, number of rows and cols to zero
-// *getter for number of rows
-// *getter for number of cols
-// *getter for number of number of non-zero
+  using Vector = std::vector<T>;
+  SparseMatrix() {};
+  size_t nrows() const { return m_nrows; }
+  size_t ncols() const { return m_ncols; }
+  size_t nnz() const { return m_nnz; }
 
-// *print function: prints the number of rows, cols and nnz; moreover calls 
-//                  _print, the virtual version of print that is specialized in the children class
+  void print(std::ostream& os = std::cout) const {
+    os << "nrows: " << m_nrows << " | ncols:" << m_ncols << " | nnz: " << m_nnz << std::endl;
+  };
 
 
-// *abstract virtual method vmult that implements vector multiplication
-// *abstract virtual method operator()(size_t i, size_t j) that implements element access in read only (const version)
-// *abstract virtual method operator()(size_t i, size_t j) that implements element access in write (returns non-const reference)
-// *virtual destructor
+  virtual Vector vmult(const Vector& v) const = 0;
+  virtual const T& operator()(size_t i, size_t j) const = 0;
+  virtual T& operator()(size_t i, size_t j) = 0;
+  virtual ~SparseMatrix() = default;
 
-protected: // protected because need to be accessible to children!
-  // *abstract virtual method _print that prints the matrix
-
-  // *variable to store nnz
-  // *variable to store number of rows
-  // *variable to store number of cols
+protected:
+  size_t m_nnz = 0;
+  size_t m_nrows = 0, m_ncols = 0;
 };
 
 int main() {
+  tic();
+  //SparseMatrix<double> A;
+  //A.print();
+  toc("first part!!");
+
+
+
   return 0;
 }

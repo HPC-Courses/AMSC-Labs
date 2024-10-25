@@ -57,7 +57,7 @@ A
 0 \\\ 1 \\\ 2 \\\ \vdots \\\ n-1 \\\ n
 \end{bmatrix} =
 \begin{bmatrix}
-1 \\\ 0 \\\ 0 \\\ \vdots \\\ 0 \\\ -n
+1 \\\ 0 \\\ 0 \\\ \vdots \\\ 0 \\\ -n-1
 \end{bmatrix}
 $$
 

@@ -220,19 +220,19 @@ int main() {
 
   {
     // check now the difference in time in ordered and unordered, the differnce is due when the number of elements stored in the map is "high". Please, be careful about this when choosing the best container.
-    int number_rows = 1e5;
+    int number_rows = 1e3;
 
     tic();
     MapMatrix<double, std::unordered_map> A;
     A.set_number_rows(number_rows);
-    for (int i = 0; i < number_rows; i++) for (int j = 0; j < 100; j++) A(i,j) = 1;
+    for (int i = 0; i < number_rows; i++) for (int j = 0; j < 1000; j++) A(i,j) = 1;
     A.finalize();
     toc("time unordered_map");
 
     tic();
     MapMatrix<double, std::map> B;
     B.set_number_rows(number_rows);
-    for (int i = 0; i < number_rows; i++) for (int j = 0; j < 100; j++) B(i,j) = 1;
+    for (int i = 0; i < number_rows; i++) for (int j = 0; j < 1000; j++) B(i,j) = 1;
     B.finalize();
     toc("time ordered");
   }
@@ -248,8 +248,8 @@ int main() {
     CooMatrix<double, std::unordered_map> coo_mtx(A);
 
     //coo_mtx(0,0) = 20;
-    //std::cout << coo_mtx(0,0) << std::endl;
-    coo_mtx.print();
+    //std::cout << coo_mtx(1,2) << std::endl;
+    //coo_mtx.print();
   }
 
   return 0;

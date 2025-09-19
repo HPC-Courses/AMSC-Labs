@@ -213,3 +213,4 @@ You can personalize the shell with, for example
 ```bash
 export PS1='\[$(tput bold)\]\[$(tput setaf 1)\]\u@\h\[$(tput setaf 4)\] \W \$\[$(tput sgr0)\] '
 ```
+If you want to know how the container image was built, you can have a look at the [Dockerfile](https://github.com/HPC-Courses/AMSC-Labs/tree/main/Labs/2025-26/00-environment_setup/extras/Dockerfile)

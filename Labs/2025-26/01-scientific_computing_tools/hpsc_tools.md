@@ -26,10 +26,10 @@ style: |
   - [2.1 g++ and clang++](#21-g++-and-clang++)
   - [2.2 GNU Make](#22-gnu-make)
   - [2.3 CMake](#23-cmake)
-
----
 - [3. Version management](#3-version-management)
   - [3.1 git](#31-git)
+
+---
   - [3.2 GitHub](#32-github)
 - [4. Containerisation in HPC](#4-containerisation-in-hpc)
   - [4.1 Apptainer](#41-apptainer)
@@ -38,7 +38,10 @@ style: |
 - [5. Modules and package managers](#5-modules-and-package-managers)
   - [5.1 mk modules](#51-mk-modules)
   - [5.2 spack](#52-spack)
-- [6. Considerations on LLMs](#6-considerations-on-llms)
+- [6. Python](#6-python)
+  - [6.1 Virtual envs](#61-virtual-envs)
+  - [6.2 Jupyter Notebooks](#62-jupyter-notebooks)
+- [7. Considerations on LLMs](#7-considerations-on-llms)
 
 ---
 # 1. Linux OS hands-on
@@ -98,4 +101,13 @@ style: |
 ## 5.2 spack
 
 ---
-# 6. Considerations on LLMs
+# 6. Python 
+
+---
+## 6.1 Virtual envs
+
+---
+## 6.2 Jupyter notebooks
+
+---
+# 7. Considerations on LLMs

@@ -1,0 +1,10 @@
+#Basic development container image
+Stage0 += baseimage(image='ubuntu:latest')
+
+# GNU compilers
+compiler = gnu()
+Stage0 += compiler
+
+# Additional development tools
+Stage0 += packages(ospackages=['build-essential', 'cmake', 'git',
+                               'libtbb-dev', 'openmpi-bin','libopenmpi-dev'])

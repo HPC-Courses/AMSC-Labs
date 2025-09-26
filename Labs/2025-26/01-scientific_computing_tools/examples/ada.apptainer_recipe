@@ -1,0 +1,6 @@
+BootStrap: docker
+From: rockylinux:9.3
+%post
+dnf install -y --setopt=install_weak_deps=False epel-release
+dnf install -y --setopt=install_weak_deps=False gcc-gnat
+rm -rf /var/cache/dnf/*

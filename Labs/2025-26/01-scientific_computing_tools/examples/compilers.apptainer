@@ -1,0 +1,24 @@
+BootStrap: docker
+From: ubuntu:latest
+%post
+    . /.singularity.d/env/10-docker*.sh
+
+# GNU compiler
+%post
+    apt-get update -y
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        g++ \
+        gcc \
+        gfortran
+    rm -rf /var/lib/apt/lists/*
+
+%post
+    apt-get update -y
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        build-essential \
+        cmake \
+        git \
+        libopenmpi-dev \
+        libtbb-dev \
+        openmpi-bin
+    rm -rf /var/lib/apt/lists/*

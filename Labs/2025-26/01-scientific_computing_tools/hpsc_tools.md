@@ -18,7 +18,7 @@ style: |
 ---
 # Outline
 - [1. Linux OS hands-on](#1-linux-os-hands-on)
-  - [1.1 The File System](#11-introduction)
+  - [1.1 Introduction](#11-introduction)
   - [1.2 The Shells](#12-shells)
   - [1.3 Text Editing](#13-text-editing)
   - [1.4 SSH and authentication](#14-ssh-and-authentication)
@@ -62,7 +62,7 @@ Some essentials commands follow; for a first further reading (interactive, login
 
 ---
 ### Essential commands
-  - `echo`: displays a string or a variable.
+  - `echo` displays a string or a variable.
   - `pwd` stands for **Print working directory**. The command displays the current path of the shell.
   - `ls` stands for a **List** and it lists the content of a directory.
   - `cd` stands for **Change directory** and changes the active directory to the path specified.
@@ -133,6 +133,12 @@ You can monitor resources with `top` for processes (`q` for quit), and compare w
 
 Similarly, `free -h` for memory. You can also use `watch -n 1 free -h` (`ctrl+c` to terminate).
 
+For checking occupied and available space check also
+```bash
+df -h .
+du -d -1 -h .
+```
+
 ---
 ## 1.3 Text editing
 Any text editor can be used in the course; a very widespread one is `vscode` (also a free/libre version is available: [https://github.com/VSCodium/vscodium](https://github.com/VSCodium/vscodium)).
@@ -142,7 +148,7 @@ Feel free to use the editor you prefer; mind that GUI editor can't be directly c
 ---
 ### A simple CLI editor: nano
 For the purposes of the course, is essential that you can use a CLI editor.
-`vim`, `emacs` and `nano` are already available in the course container; feel free to choose the one you prefer.
+`vim` (exit with `Esc` and `:q!`), `emacs` (exit with `ctrl+x` and `ctrl+c`) and `nano` are already available in the course container; feel free to choose the one you prefer.
 `nano` is definitely the simpler, and its commands are summarised in the editor window. You can better the UX with a few options, such as
 ```bash
 nano -liST 2 filename.cpp
@@ -241,6 +247,11 @@ You can use GitHub to:
  - create a new repository
  - fork existent ones, create pull requests (more advanced)
 Try to do the first two in class
+You can specify your name, mail, default editor... both locally and globally. For the latter, eg
+```bash
+git config --global core.editor "nano -ilST 2"
+```
+or manually edit `~/.gitconfig`
 
 ---
 # 4. Containerisation in HPC
@@ -325,8 +336,8 @@ echo $mkEigenInc
 
 
 ---
-## 5.2 spack
-Spack is a multi-platform package manager that builds and installs multiple versions and configurations of software. It works on Linux, macOS, Windows, and many supercomputers. Spack is non-destructive: installing a new version of a package does not break existing installations, so many configurations of the same package can coexist.
+## 5.2 spack (readings)
+Spack is a multi-platform package manager that builds and installs multiple versions and configurations of software. Spack is non-destructive: installing a new version of a package does not break existing installations, so many configurations of the same package can coexist.
 
 Spack offers a simple "spec" syntax that allows users to specify versions and configuration options. Package files are written in pure Python, and specs allow package authors to write a single script for many different builds of the same package. 
 

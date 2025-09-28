@@ -38,7 +38,7 @@ style: |
   - [4.3 HPCCM and Python Envs](#43-hpccm-and-python-envs)
 - [5. Modules and package managers](#5-modules-and-package-managers)
   - [5.1 mk modules](#51-mk-modules)
-  - [5.2 spack](#52-spack)
+  - [5.2 spack (readings)](#52-spack-readings)
 
 ---
 # 1. Linux OS hands-on

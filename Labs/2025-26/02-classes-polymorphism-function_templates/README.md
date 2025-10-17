@@ -69,7 +69,7 @@ cout << "4 = " << f(1) << endl;
 
 struct __unnamed 
 {
- real_t s;
+ real_t a;
  vector <real_t>& v;
  real_t operator()(int i) { return v[i] * a;}
 };

@@ -116,3 +116,15 @@ int main() {
     
     return 0;
 }
+/* 
+Example output:
+Static memory: 0x5568cd22a1d8
+Stack memory (y): 0x7ffd4d7ddbdc
+Stack memory (a): 0x7ffd4d7ddc1c
+Stack memory (c): 0x7ffd4d7ddbdb
+Heap memory 2 (v after init): 0x5568e4cb3730
+Stack memory (z): 0x7ffd4d7ddb84
+Heap memory (v after init): 0x5568e4cb3730
+Heap memory (pt): 0x5568e4cb3760
+Heap memory (v after push_back): 0x7f3efa8de010
+*/

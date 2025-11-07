@@ -1,0 +1,5 @@
+#!/bin/bash
+#PBS -l select=1:ncpus=1:host=cpu01+1:ncpus=1:host=gpu01
+#PBS -l walltime=00:01:00
+#PBS -N hello_pbs
+echo "hello from pbs on node $(hostname)" &> $HOME/hello.from.pbs

@@ -1,0 +1,10 @@
+#!/bin/bash
+#PBS -l select=7
+#PBS -l place=scatter
+#PBS -l walltime=00:05:00
+#PBS -N hello_scatter
+
+# Print each node name
+for node in $(cat $PBS_NODEFILE | uniq); do
+    echo "hello from pbs on node $node" &>> $HOME/hello.scatter.$PBS_JOBID
+done

@@ -1,0 +1,394 @@
+\documentclass[10pt,aspectratio=169]{beamer}
+\usetheme{default}
+\setbeamercovered{invisible}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}{
+    \flushright{\hfill \insertframenumber{}/\inserttotalframenumber}
+}
+
+\usepackage{listings}
+\lstdefinestyle{cpp}{
+	backgroundcolor = \color{blue!5!white},
+	aboveskip=10pt, belowskip=10pt,
+	numbers=left, numberstyle=\tiny,
+	tabsize=2,
+	breaklines=true,
+	basicstyle=\scriptsize\ttfamily,
+	keywordstyle = \color{blue!50!cyan}\bfseries,
+	commentstyle = \color{darkgray!90},
+	stringstyle = \color{OliveGreen},
+	morecomment=[l][\color{violet!90!black}]{\#},
+	identifierstyle=\color{blue!25!black}
+}
+
+\begin{document}
+    \title{Lab 05}\subtitle{PBS and C++17 STD algorithms introduction}
+\author{Paolo Joseph Baioni\\ \href{mailto:paolojoseph.baioni@polimi.it}{\color{blue}paolojoseph.baioni@polimi.it}}
+\date{\today}
+    
+\begin{frame}[plain, noframenumbering]
+    \maketitle
+\end{frame}
+
+\begin{frame}{First introduction to PBS}
+    OpenPBS is a software which optimises job scheduling and workload management in high-performance computing environments.\\
+    First steps:
+    \begin{itemize}
+        \item set up ssh on the cluster
+        \item set up pbs environment: {\ttfamily . /etc/profile.d/pbs.sh}
+    \end{itemize}
+The second step is actually optional, you can also avoid it and use the full path, eg {\ttfamily /opt/pbs/bin/pbsnodes -aSj}
+\end{frame}
+
+\begin{frame}{First introduction to PBS}
+The main commands we will use are:
+\begin{itemize}
+    \item {\ttfamily pbsnodes -aSj} to check available nodes
+    \item {\ttfamily qstat}, to interrogate queues
+    \item {\ttfamily qsub}, to submit jobs
+    \item {\ttfamily qdel}, to delete submitted jobs
+\end{itemize}
+In particular, the base submission command is {\ttfamily qsub -I} (capital i), which requests an interactive job with default options (ncpus=1, first available cpu); ctrl+D to exit.
+\end{frame}
+
+\begin{frame}[fragile]{First introduction to PBS}
+The powerful feature of qsub is the ability to submit batch jobs via submission scripts; you can find some hello world examples in the repo.\\
+It's worth noting that the same options which can be specified via script can also be used CLI for an interactive session, so, for example
+{\ttfamily qsub -I -l select=1:ncpus=2:host=cpu03}
+will ask for an interactive job on a single node, 2 cpus (threads) on the host with short hostname cpu03; parameters not specified, such as queue and walltime, get default values.
+\end{frame}
+
+\begin{frame}{A dive into std::algorithms \& execution policies}
+Ingredients:
+    \begin{itemize}
+        \item lambdas \& function objects
+        \item C++17 \href{https://en.cppreference.com/w/cpp/algorithm}{\color{blue}standard algorithms} and \href{https://en.cppreference.com/w/cpp/algorithm/execution_policy_tag_t}{\color{blue} execution policies}
+        \item gcc toolchain and tbb module (or equivalent in the course docker/podman container)
+        \item extra: ad-hoc compilers for offloading execution to devices (eg GPU, but works also on CPU), such as \href{https://catalog.ngc.nvidia.com/orgs/nvidia/containers/nvhpc}{\color{blue}nvhpc container}*.
+    \end{itemize}
+    \vfill
+    {\footnotesize *Can be built with:\\
+    {\ttfamily sudo docker run --gpus all -it --rm nvcr.io/nvidia/nvhpc:25.9-devel-cuda\_multi-ubuntu24.04} \\
+    or \\
+    {\ttfamily singularity build nvhpc.sif docker://nvcr.io/nvidia/nvhpc:25.9-devel-cuda\_multi-ubuntu24.04}\\
+    Requires proper drivers for GPU execution.\\
+    It takes some minutes to download, so, if you want to use it on your own laptop, it might be better to start the build now\\
+        \textbf{Remark}: With C++17, the parallel version requires to link against the Intel Threading Building Blocks (\texttt{TBB}) library (in the mk modules, preprocessor flags \texttt{-I\$\{mkTbbInc\}}, linker flags \texttt{-L\$\{mkTbbLib\} -ltbb})}
+.
+\end{frame}
+
+\begin{frame}[fragile]{Lambdas and Functors recap}
+    \begin{enumerate}
+        \item Lambdas are un-named function objects
+\begin{lstlisting}[frame=single, style=cpp, firstnumber=1, numbers=left, numberstyle=\tiny,showtabs=false,xleftmargin=.05\linewidth,xrightmargin=.025\linewidth]
+vector<real_t> v = {0, 1, 2, 3};
+real_t a = 4.;
+auto f = [&v,a](idx_t i) { return v[i] * a; };
+cout << "4 = " << f(1) << endl;
+
+struct __unnamed 
+{
+ real_t s;
+ vector <real_t>& v;
+ real_t operator()(int i) { return v[i] * a;}
+};
+__unnamed f{a, v};
+cout << "4 = " << f(1) << endl;
+\end{lstlisting}
+\item You can pass vectors also copying pointers (gpu safe, see last slides)
+        \begin{lstlisting}[frame=single, style=cpp, firstnumber=1, numbers=left, numberstyle=\tiny,showtabs=false,xleftmargin=.05\linewidth,xrightmargin=.025\linewidth]
+vector<real_t> v = {0, 1, 2, 3};
+real_t a = 4.;
+auto f = [v = v.data (), a](idx_t i) { return v[i] * a; };
+cout << "4 = " << f(1) << endl;
+\end{lstlisting}
+    \end{enumerate}
+\end{frame}
+
+\begin{frame}[fragile]{C++17 Algorithms Recap}
+From for loops
+\begin{lstlisting}[frame=single, style=cpp, firstnumber=1, numbers=left, numberstyle=\tiny,showtabs=false,xleftmargin=.05\linewidth,xrightmargin=.025\linewidth]
+vector <real_t> u (3), v = {0, 1, 2};
+for (idx_t i = 0; i < u.size () ; ++i)
+  u[i] =  v[i];
+\end{lstlisting}
+to std::algorithm
+\begin{lstlisting}[frame=single, style=cpp, firstnumber=1, numbers=left, numberstyle=\tiny,showtabs=false,xleftmargin=.05\linewidth,xrightmargin=.025\linewidth]
+transform (v.cbegin (), v.cend (), u.begin (), [](const real_t & vi){return vi;});
+\end{lstlisting}
+That takes an optional {\ttfamily ExecutionPolicy\&\& policy} as first parameter
+\end{frame}
+
+\begin{frame}[fragile]{C++17 - C++20 Execution Policies - I}
+The execution policy types:
+\begin{lstlisting}[frame=single, style=cpp, firstnumber=1, numbers=left, numberstyle=\tiny,showtabs=false,xleftmargin=.05\linewidth,xrightmargin=.025\linewidth]
+std::execution::sequenced_policy
+std::execution::parallel_policy
+std::execution::parallel_unsequenced_policy
+std::execution::unsequenced_policy
+\end{lstlisting}
+have the following respective instances:
+\begin{lstlisting}[frame=single, style=cpp, firstnumber=1, numbers=left, numberstyle=\tiny,showtabs=false,xleftmargin=.05\linewidth,xrightmargin=.025\linewidth]
+std::execution::seq,
+std::execution::par,
+std::execution::par_unseq, and
+std::execution::unseq.
+\end{lstlisting}
+These instances are used to specify the execution policy of parallel algorithms, i.e., the kinds of parallelism allowed.
+\end{frame}
+\begin{frame}{C++17 - C++20 Execution Policies - II}
+\begin{enumerate}
+    \item \textbf{seq}: requires that a parallel algorithm's execution may not be parallelized.
+    \item \textbf{par}: indicates that a parallel algorithm's execution may be parallelized. The invocations of element access functions in parallel algorithms invoked with this policy are permitted to execute in either the invoking thread or in a thread implicitly created by the library to support parallel algorithm execution.
+    \item \textbf{par\_unseq}: indicates that a parallel algorithm's execution may be parallelized, vectorized, or migrated across threads. The invocations of element access functions in parallel algorithms invoked with this policy are permitted to execute in an unordered fashion in unspecified threads, and unsequenced with respect to one another within each thread.
+    \item \textbf{unseq} (C++20): indicates that a parallel algorithm's execution may be vectorized, e.g., executed on a single thread using instructions that operate on multiple data items.
+\end{enumerate}
+\vfill
+\textbf{Remark} When using any parallel execution policy, it is the programmer's responsibility to avoid data races and deadlocks.
+\end{frame}
+
+\begin{frame}[fragile]{Indexing}
+    In for loops we can use plain indices; given some functional {\ttfamily f} and vector v, we have
+\begin{lstlisting}[frame=single, style=cpp, firstnumber=1, numbers=left, numberstyle=\tiny,showtabs=false,xleftmargin=.05\linewidth,xrightmargin=.025\linewidth]
+for (idx_t i = 0; i < v.size (); ++i) 
+    v[i] = f(i);
+\end{lstlisting}
+ 
+
+    \bigskip
+    In std::algorithms we can use:
+    \begin{itemize}
+        \item raw pointers (error prone, not suggested)
+        \item index vectors (memory inefficient, not suggested)
+        \item counting iterators (external library required)
+        \item C++20 std::ranges and std::views (full support from C++23, eg, for n-dimensional arrays)
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Raw pointers}
+Compute index as difference between each element memory address and raw pointer to vector data 
+
+\begin{lstlisting}[frame=single, style=cpp, firstnumber=1, numbers=left, numberstyle=\tiny,showtabs=false,xleftmargin=.05\linewidth,xrightmargin=.025\linewidth]
+std::transform (v.begin (), v.end (), 
+               [v = v.data(), f](real_t vi) 
+               {
+                 auto i = &vi - v;
+                 return f(i);
+               });
+\end{lstlisting}
+
+\end{frame}
+
+\begin{frame}[fragile]{Vectors of indices}
+Easiest solution, highly inefficient
+
+\begin{lstlisting}[frame=single, style=cpp, firstnumber=1, numbers=left, numberstyle=\tiny,showtabs=false,xleftmargin=.05\linewidth,xrightmargin=.025\linewidth]
+std::vector <idx_t> indices (v.size ());
+std::iota (indices.begin (), indices.end (), 0); 
+// now indices is {0,1,2...v.size()-1}
+std::for_each (indices.begin (), indices.end (), 
+               [v = v.data()](idx_t i) 
+               {
+                 v[i] = f(i);
+               });
+\end{lstlisting}
+Almost equal to the traditional for loop: ease of porting, but we are allocating a full vector of indices
+
+\textbf{Remark} Avoid using vector of indices, it is shown here only for didactic purposes, to help giving an operational definition of counting iterators and views in this realm.
+\end{frame}
+
+\begin{frame}[fragile]{Counting iterators}
+One of the best available solutions, requires:
+\begin{itemize}
+    \item C++17
+    \item a library (boost and thrust are header only, it is enough to include them; boost is in the mk modules)
+\end{itemize}
+
+\begin{lstlisting}[frame=single, style=cpp, firstnumber=1, numbers=left, numberstyle=\tiny,showtabs=false,xleftmargin=.05\linewidth,xrightmargin=.025\linewidth]
+boost::counting_iterator <idx_t> first(0), last(v.size ());
+std::for_each (first, last, 
+               [v = v.data(), f](idx_t i) 
+               {
+                 v[i] = f(i);
+               });
+\end{lstlisting}
+\textbf{Remark:} compile with {\ttfamily g++ -std=c++20 -I\$mkBoostInc boost\_example.cpp}
+\end{frame}
+
+\begin{frame}[fragile]{Ranges and views}
+One of the best available solutions; features:
+\begin{itemize}
+    \item C++20 required, 23 for full support
+    \item no external dependencies needed
+\end{itemize}
+C++20:
+\begin{lstlisting}[frame=single, style=cpp, firstnumber=1, numbers=left, numberstyle=\tiny,showtabs=false,xleftmargin=.05\linewidth,xrightmargin=.025\linewidth]
+auto indices = std::views::iota (0, v.size ());
+std::for_each (indices.begin (), indices.end (),
+              [v = v.data()](idx_t i) 
+              {
+                v[i] = f(i);
+              });
+\end{lstlisting}
+From C++23* 
+\begin{lstlisting}[frame=single, style=cpp, firstnumber=1, numbers=left, numberstyle=\tiny,showtabs=false,xleftmargin=.05\linewidth,xrightmargin=.025\linewidth]
+std::views::cartesian_product(std::views::iota (0, m), std::views::iota (0, n));
+...
+\end{lstlisting}
+\textbf{Remark:} remember to {\ttfamily \#include <ranges>} for the definition of {\ttfamily std::views::iota}\\\bigskip
+\vfill
+{\small  *In previous standards you could rely on proposals for missing features, eg\\ \href{https://github.com/ericniebler/range-v3}{\color{blue}https://github.com/ericniebler/range-v3}, but, in case, it becomes competitive with boost}
+\end{frame}
+
+\begin{frame}{Example application: Single/Double precision A $\times$ X + Y}
+SAXPY and DAXPY stands for Single and Double-Precision A $\times$ X + Y\\
+It is a basic operation in linear algebra and is commonly used in numerical computing.\\
+We will use it to show examples of:
+\begin{itemize}
+    \item basic std algoritghms usage
+    \item efficient std algorithms usage
+    \item parallel std algorithms usage and performance metrics (bandwidth)
+    \item possible effects of floats precision
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]{Saxpy - slow}
+Using STL defined std::algorithms only
+\begin{lstlisting}[frame=single, style=cpp, firstnumber=1, numbers=left, numberstyle=\tiny,showtabs=false,xleftmargin=.05\linewidth,xrightmargin=.025\linewidth]
+void saxpy_slow (float a, std::vector <float> & x, std::vector <float> & y)
+{
+  std::vector <float> temp (x.size ());
+  std::fill (temp.begin (), temp.end (), a);
+  std::transform (x.begin (), x.end (), temp.begin (), temp.begin (), std::multiplies <float> ());
+  std::transform (temp.begin (), temp.end (), y.begin (), y.begin (), thrust::plus <float> ());
+}
+\end{lstlisting}
+
+\end{frame}
+
+\begin{frame}[fragile,allowframebreaks]{Saxpy - fast - full example}
+Using user-defined function object and {\ttfamily std::for\_each}
+\begin{lstlisting}[frame=single, style=cpp, firstnumber=1, numbers=left, numberstyle=\tiny,showtabs=false,xleftmargin=.05\linewidth,xrightmargin=.025\linewidth]
+#include <algorithm>
+#include <iostream>
+#include <vector>
+#ifdef USE_BOOST
+  #include <boost/iterator/counting_iterator.hpp>
+#else
+  #include <ranges>
+#endif
+
+using idx_t = size_t;
+using real_t = float;
+
+int main()
+{
+  std::vector <real_t> x{0,1,2,3,4}, y{0,1,2,3,4};
+  real_t a (5.);
+  
+  auto saxpy = [x = x.data (), y = y.data (), a] 
+               (idx_t i)
+	             { y[i] += a * x[i];};
+
+  
+  #ifdef USE_BOOST
+		boost::counting_iterator <idx_t> first(0), last(x.size ());
+		std::for_each (first, last, saxpy);
+  #else
+  	auto indices = std::views::iota (static_cast<std::vector<real_t>::size_type> (0),  x.size ());
+	  std::for_each (indices.begin (), indices.end (), saxpy);           
+  #endif
+  
+  for (idx_t i=0; i<x.size(); ++i)
+  	std::cout << 5 << "x" << x[i] << "+" << x[i] << "=" << y[i] << std::endl;
+  return 0;
+}
+\end{lstlisting}
+Compile with {\ttfamily g++ -std=c++20 -Wall saxpy.cpp -o views} , or: 
+\begin{lstlisting}[frame=single, style=cpp, firstnumber=1, numbers=left, numberstyle=\tiny,showtabs=false,xleftmargin=.05\linewidth,xrightmargin=.025\linewidth]
+source /u/sw/etc/bash.bashrc
+module load gcc-glibc
+module load boost
+g++ -std=c++20 -Wall -I$mkBoostInc -DUSE_BOOST saxpy.cpp -o boost
+\end{lstlisting}
+and test with {\ttfamily ./views} or {\ttfamily ./boost}
+\end{frame}
+
+\begin{frame}[fragile]{Notes on parallel execution - I}
+\begin{itemize}
+    \item you can modify the above saxpy.cpp to run in parallel, adding {\ttfamily \#include <execution>} and {\ttfamily std::execution::par\_unseq} in the {\ttfamily for\_each}
+    \item if you use g++ (or clang++), you have to link against a parallel library, such as tbb. In our case, eg with boost, besides the above steps, we have:
+    \begin{lstlisting}[frame=single, style=cpp, firstnumber=1, numbers=left, numberstyle=\tiny,showtabs=false,xleftmargin=.05\linewidth,xrightmargin=.025\linewidth]
+module load tbb
+g++ -std=c++20 -Wall -I$mkBoostInc -I$mkTbbInc -L$mkTbbLib -ltbb -DUSE_BOOST saxpy.cpp -o boost+tbb
+./boost+tbb
+\end{lstlisting}
+\item if you have nvhpc sdk (software development toolkit), you can compile also with
+\begin{itemize}
+    \item cpu: {\ttfamily nvc++ -stdpar=multicore -std=c++20 -O4 -fast -march=native -Mllvm-fast -DNDEBUG -o saxpy saxpy.cpp}
+    \item NVIDIA gpu: {\ttfamily nvc++ -stdpar=gpu -std=c++20 -O4 -fast -march=native -Mllvm-fast -DNDEBUG -o saxpy saxpy.cpp}
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Notes on parallel execution - II}
+\begin{itemize}
+\item mind that GPUs are not CPUs with more threads; the hardware solutions introduced to achieve their parallelism and memory bandwidth requires constraints on the code, which currently, for nvc++, can be translated in the following recommendations:
+\begin{itemize}
+    \item prefer declaring and defining functions to be run on device in the same file (eg, define a full functor in a .hpp)
+    \item prefer dynamically allocated containers, such as std::vectors instead of std::arrays
+    \item avoid function pointers
+    \item avoid references in lambda captures
+    \item avoid exeptions
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Notes on parallel execution - III}
+\begin{itemize}
+\item for performance metrics, check the uploaded ``bandwidth.cpp" example. You can compile with
+\begin{itemize}
+    \item {\ttfamily g++ -std=c++20 -Wall -Ofast -march=native -DNDEBUG -o daxpy\_g++\_tbb bandwidth.cpp -ltbb}
+    \item {\ttfamily clang++ -std=c++20 -Wall -O3 -ffast-math -march=native -DNDEBUG -o daxpy\_clang++\_tbb bandwidth.cpp -ltbb}
+    \item {\ttfamily nvc++ -stdpar=multicore -std=c++20 -Wall -O4 -fast -march=native -Mllvm-fast -DNDEBUG -o daxpy\_nvc++\_multicore bandwidth.cpp}
+    \item {\ttfamily nvc++ -stdpar=gpu -std=c++20 -Wall -O4 -fast -march=native -Mllvm-fast -DNDEBUG -o daxpy\_nvc++\_gpu bandwidth.cpp}
+\end{itemize}
+\item and compare the results of, eg
+\begin{itemize}
+    \item {\ttfamily ./daxpy\_g++\_tbb 1000000} and {\ttfamily ./daxpy\_nvc++\_gpu 1000000}
+    \item {\ttfamily ./daxpy\_g++\_tbb 100000000} and {\ttfamily ./daxpy\_nvc++\_gpu 100000000}
+\end{itemize}
+for {\ttfamily real\_t=float} and {\ttfamily real\_t=double}
+\end{itemize}
+    
+\end{frame}
+
+\begin{frame}{Extra}
+    You can also use the Thrust library from NVIDIA, or its AMD counterpart (rocThrust), to write computational kernels on both CPU and GPUs. In saxpy.cu you can find an example which relies on Thrust only; it can be compiled with
+  \begin{itemize}
+    \item \texttt{nvcc saxpy.cu -DNDEBUG -O4 -o saxpy.cpu -DTHRUST\_DEVICE\_SYSTEM=THRUST\_DEVICE\_SYSTEM\_CPP}
+    \item \texttt{nvcc saxpy.cu -arch=sm\_89 -DNDEBUG -O4 -o saxpy.gpu}
+\end{itemize}
+to be run respectively in serial on the CPU or in parallel on a single GPU.
+As an exercise, you can try 
+\begin{itemize}
+    \item other Thrust backends
+    \item a unified version, using std::execution, Boost and TBB on the CPU, Thrust::device on the GPU
+\end{itemize}
+\end{frame}
+
+\begin{frame}{References}
+\begin{itemize}
+    \item \href{https://github.com/openpbs/openpbs}{https://github.com/openpbs/openpbs}
+    \item \href{https://en.cppreference.com/w/cpp/}{https://en.cppreference.com/}
+    \item \href{https://developer.nvidia.com/}{https://developer.nvidia.com/}
+    \item \href{https://www.boost.org/}{https://www.boost.org/}
+    \item \href{https://github.com/ericniebler}{https://github.com/ericniebler}
+    \item \href{https://github.com/NVIDIA/thrust?tab=readme-ov-file}{https://github.com/NVIDIA/thrust}
+\end{itemize}
+    
+\end{frame}
+
+\end{document}
+

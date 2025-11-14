@@ -1,0 +1,313 @@
+\documentclass[9pt]{beamer}
+\usetheme{default}
+\setbeamercovered{invisible}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}{
+    \flushright{\hfill \insertframenumber{}/\inserttotalframenumber}
+}
+
+\usepackage{listings}
+
+% User-defined colors.
+\definecolor{DarkGreen}{rgb}{0, .5, 0}
+\definecolor{DarkBlue}{rgb}{0, 0, .5}
+\definecolor{DarkRed}{rgb}{.5, 0, 0}
+\definecolor{LightGray}{rgb}{.95, .95, .95}
+\definecolor{White}{rgb}{1.0,1.0,1.0}
+\definecolor{darkblue}{rgb}{0,0,0.9}
+\definecolor{darkred}{rgb}{0.8,0,0}
+\definecolor{darkgreen}{rgb}{0.0,0.85,0}
+
+% Settings for listing class.
+\lstset{
+  language=C++,                        % The default language
+  basicstyle=\small\ttfamily,          % The basic style
+  backgroundcolor=\color{White},       % Set listing background
+  keywordstyle=\color{DarkBlue}\bfseries, % Set keyword style
+  commentstyle=\color{DarkGreen}\itshape, % Set comment style
+  stringstyle=\color{DarkRed}, % Set string constant style
+  extendedchars=true % Allow extended characters
+  breaklines=true,
+  basewidth={0.5em,0.4em},
+  fontadjust=true,
+  linewidth=\textwidth,
+  breakatwhitespace=true,
+  showstringspaces=false,
+  lineskip=0ex, %  frame=single
+}
+
+\DeclareSymbolFont{extraup}{U}{zavm}{m}{n}
+\DeclareMathSymbol{\varheart}{\mathalpha}{extraup}{86}
+
+\begin{document}
+    \title{\Large Lab 06}\subtitle{\large Plugins}
+    \author{Paolo Joseph Baioni}
+    \date{\today}
+
+\begin{frame}[plain, noframenumbering]
+    \maketitle
+\end{frame}
+
+\begin{frame}[fragile]{How to use a third-party library}
+  Basic compile/link flags:
+\begin{verbatim}
+$ g++ -I${mkLibrarynameInc} -c main.cpp
+$ g++ -L${mkLibrarynameLib} -llibraryname main.o -o main
+\end{verbatim}
+\bigskip
+\textbf{Warning}: by mistake, one can include headers and link against libraries related to different installations/versions of the same library! The compile, link and loading phase may succeed, but the executable may crash, resulting in a very subtle yet painful error to debug!
+\end{frame}
+
+\section{Some useful things to remember about shared libraries}
+
+\begin{frame}{Using shared libraries}
+   Shared libraries:
+   \begin{itemize}
+       \item User point of view
+       \item Developer point of view
+   \end{itemize}
+
+  \medskip
+   Users need to take care to 
+   \begin{itemize}
+       \item \textbf{linking} phase during compilation
+       \item \textbf{loading} phase at execute time
+   \end{itemize}
+
+  \medskip
+   Developers usually contribute to a
+   \begin{itemize}
+       \item \textbf{development} phase
+       \item \textbf{release} phase
+   \end{itemize}
+
+\end{frame}
+
+
+\begin{frame}{Versions and releases} 
+  The \emph{version} is a symbol
+  (typically a number) by which we indicate a set of instances of a
+  library with a common public interface and functionality.
+  \smallskip
+
+    Within a version, one may have several \textit{releases}, typically indicated
+  by one or more numbers (major and minor or bug-fix). A new release is 
+  issue to fix bugs  or improve of a library without
+  changes in its public interface. So a code linked against version 1,
+  release 1 of a library should work (in principle) when you update
+  the library to version 1, release 2.
+  \smallskip
+
+  Normally version and releases are separated by a dot in the library name:
+  \texttt{libfftw3.so.3.3.9} is version 3, release 3.9 of the
+  \texttt{fftw3} library (The Fastest Fourier Transform in the West).
+
+\end{frame}
+
+\begin{frame}[fragile]{Naming scheme of shared libraries (Linux/Unix)}
+\small
+  We give some nomenclature used when describing a shared library
+
+  \begin{itemize}
+      \item \textbf{link name}: name used in the linking stage when
+    you use the \texttt{-lmylib} option.  
+    \item \textbf{soname}: \textit{shared object name} looked after
+    by the \emph{loader} stage.  
+\item \textbf{full name}: name of the actual file that stores the library. 
+  \end{itemize}
+\medskip
+
+    Example:
+    \begin{itemize}
+        \item[] \texttt{fftw}: is the \textit{link name}.
+        \item[] \texttt{libfftw3.so.3}: is the \textit{soname}.
+        \item[] \texttt{libfftw3.so.3.3.9}: is the \textit{real name} of the file.
+    \end{itemize}
+
+    We call a \textit{fully qualified library} a soname that contains the full path to the library.
+\end{frame}
+
+
+\begin{frame}[fragile]{How does it work?}  The command
+  \texttt{ldd} lists the shared libraries used by an object file. \\
+  \medskip
+  
+\textbf{Example:}
+\begin{verbatim}
+$ ldd ${mkOctavePrefix}/lib/octave/6.2.0/liboctave.so
+...
+libfftw3.so.3 -> /u/sw/toolchains/
+   gcc-glibc/11.2.0/pkgs/fftw/3.3.9/lib/libfftw3.so.3
+...
+\end{verbatim}
+\begin{itemize}
+	\item \texttt{Octave} has been linked to \texttt{libfftw3}.
+\end{itemize}
+
+The \textbf{loader} searches the occurrence of this library, finding his full qualified name. \\ \medskip
+
+\textbf{Which release?} 
+\begin{verbatim}
+$ ls -l ${mkFftwLib}/libfftw3.so.3
+/full/path/to/libfftw3.so.3 -> libfftw3.so.3.3.9
+\end{verbatim}
+I am in fact using release \texttt{3.9} of version \texttt{3}.
+\end{frame}
+
+\begin{frame}{Explanation}  
+
+  The executable (\texttt{octave}) contains the
+  information on which shared library to load, including version
+  information (its \texttt{soname}). This part has been taken care by the 
+  developers of \texttt{Octave}.
+  \smallskip
+
+  When I launch the program the loader looks in special directories,
+  among which \texttt{/usr/lib} for a file that matches the
+  \texttt{soname}. This file is typically a symbolic link to the real
+  file containing the library.  
+  \medskip
+
+  If I have a new release of \texttt{fftw3} version 3, let's say $3.4.1$,
+  I just need to place the corresponding shared library file, reset the symbolic links and automagically \texttt{octave}
+  will use the new release (this is what \texttt{apt} does when
+  installing a new update in a Debian/Ubuntu system, for example).
+
+  \smallskip
+
+  No need to recompile anything!
+\end{frame}
+
+
+\begin{frame}[fragile]{Another nice thing about shared libraries} 
+
+  A shared library may depend on another shared library. This information may be encoded  when creating the library
+  (just as for an executable, we will see it later on).
+
+  For instance
+\begin{verbatim}
+$ ldd /usr/lib/x86_64-linux-gnu/libumfpack.so.5
+...
+libblas.so.3 => /lib/x86_64-linux-gnu/libblas.so.3
+...
+\end{verbatim}
+The UMFPACK library is linked against version
+\texttt{3} of the BLAS library. \smallskip
+
+This prevents using incorrect version of
+libraries. Moreover, when creating an executable that needs UMFPACK I have to indicate only
+\texttt{-lumfpack}! \\
+\textbf{Note}: This is not true for static libraries: you have to list all dependencies.
+\end{frame}
+
+\begin{frame}[fragile]{How to link against a shared library}   
+  It is now sufficient to proceed as usual
+\begin{verbatim}
+g++ -I${mkFFtwInc} -c main.cpp
+g++ -L${mkFFtwLib} -lfftw3 main.o -o main
+\end{verbatim}
+
+The linker finds \texttt{libfftw3.so}, controls the symbols it
+provides and verifies if the library contains a
+\texttt{soname} (if not the link name is assumed to be also the
+soname).
+
+Indeed \texttt{libfftw3.so} provides a \texttt{soname}. If we wish we
+can check it:
+\begin{verbatim}
+$ objdump libx.so.1.3 -p | grep SONAME
+SONAME   libfftw3.so.3
+\end{verbatim}
+(of course this has been taken care by the library developers).
+\end{frame}
+
+\begin{frame}[fragile]
+
+  Being \texttt{libfftw3.so} a shared library the linker does not
+  resolve the symbols by integrating the corresponding code in the
+  executable. Instead, it inserts the information about the
+  \texttt{soname} of the library:
+  \smallskip
+
+\begin{verbatim}
+$ ldd main
+libfftw3.so.3 => /full/path/to/libfftw3.so.3
+\end{verbatim}
+\smallskip
+The loader can then do its job now!
+\smallskip
+
+In conclusion, linking with a shared library is not more complicated
+than linking with a static one.
+\medskip
+
+\textbf{Remember:} By default if the linker finds both the static and
+shared version of a library it gives precedence to the shared
+one. If you want to by sure to link with the static version you need to use 
+the \texttt{-static} linker option.
+\end{frame}
+
+\begin{frame}{Directories where the loader searches the shared libraries}  
+	
+	\begin{itemize}
+		\item  \texttt{/lib*} or  \texttt{/usr/lib*} .
+		\item Additional directories can specified by \texttt{/etc/ld.conf} and files inside the directory \texttt{/etc/ld.conf.d/}.
+	\end{itemize}
+
+
+  The command \texttt{ldconfig} rebuilds the data base of the shared
+  libraries and should be called every time one adds a new library (of
+  course \texttt{apt} does it for you, and moreover
+  \texttt{ldconfig} is launched at every boot of the computer).
+  \smallskip
+
+  \textbf{Note}: all this operations require you act as superuser, for
+  instance with the \texttt{sudo} command.
+\end{frame}
+
+\begin{frame}[fragile]{Alternative ways of directing the loader}
+  \begin{itemize}
+  \item Setting the environment variable \texttt{LD\_LIBRARY\_PATH}. If
+    it contains a comma-separated list of directory names the
+    loader will first look for libraries on these directories (analogous to \texttt{PATH} for executables):
+\begin{verbatim}
+  export LD_LIBRARY_PATH+=:dir1:dir2
+\end{verbatim}
+\item With the special flag \texttt{-Wl,-rpath=directory}
+  during the compilation of the executable, for instance
+\begin{verbatim}
+  g++ main.cpp -o main -Wl,-rpath=/opt/lib  -L. -lsmall
+\end{verbatim}
+Here the loader will look in \texttt{/opt/lib} before the standard directories. You can use also relative paths. See e.g. \href{https://gcc.gnu.org/onlinedocs/gcc/Directory-Options.html}{\color{blue}gcc directory options} and \href{https://gcc.gnu.org/onlinedocs/gcc/Link-Options.html}{\color{blue}gcc link options}
+\item Launching the command \texttt{sudo ldconfig -n directory} which adds \texttt{directory} to the loader search path (superuser privileges are required). This addition remains valid until the next reboot of the computer. \textbf{Note}: \underline{prefer the other alternatives!}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{How to build a shared library?}
+  We will dedicate another lecture to this issue, where we will also show how to handle shared libraries and symbols dynamically.
+  For the moment we need to know only the following:
+  \begin{itemize}
+  \item When building a shared library we need to pass the option \texttt{-shared} to the linker
+  \item Object code used in a shared library must be \emph{position independent} (compiler option \texttt{-fPIC})
+  \end{itemize}
+
+  Basic build of a shared library starting from an object file:
+\begin{verbatim}
+$ g++ -shared -Wl,-soname,libutility.so utility.o -o libutility.so
+\end{verbatim}
+\end{frame}
+
+
+\begin{frame}{Exercise 1: quadrature rules with plugins}
+\begin{itemize}
+\item Implement a code that enables the user to compute the integral of a scalar function by selecting the quadrature rule as the name of a dynamically loadable object;
+\item The dynamically loadable object should define a function with the following signature:
+\texttt{double integrate(std::function<double (double)>, double a, double b)}.
+\item Implement plugins for midpoint and trapezoidal rule.
+\item {\color{gray}Implement a plugin for quadrature with adaptive refinement.}
+\end{itemize}
+\end{frame}
+
+
+\end{document}
+

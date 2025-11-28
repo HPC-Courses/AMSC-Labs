@@ -28,7 +28,7 @@ style: |
 
 ```
 . /etc/profile.d/pbs.sh
-qsub -I -q cpu -l select=1:ncpus=3:host=cpu05
+qsub -I -q cpu -l select=1:ncpus=6:host=cpu05
 source /software/spack/share/spack/setup-env.sh
 spack load gcc@15.2.0
 spack load intel-oneapi-tbb@2022.3.0
@@ -39,13 +39,17 @@ which gcc
 ---
 # Application: 2D heat equation
 ## Boundary and initial conditions
-![w:600 center](img/bc+ic.png)
+$$
+U(t) \propto  \int_{\Omega} T(x,y;t)d\Omega, \quad lim_{t\rightarrow \infty}U(t)=L\in\mathbb R
+$$
+(steady state eq.)
+![bg right 90%](img/bc+ic.png)
 
 ---
 # Application: 2D heat equation
 ## Grid & update
 $$
-T(i,j;t) =  \sum_{m=i-1, n=j-1}^{m=i+1, n=j+1} T(m,n;t)
+T(i,j;t) \propto  \sum_{m=i-1, n=j-1}^{m=i+1, n=j+1} T(m,n;t - 1)
 $$
 ![bg left 85%](img/grid.png)
 
@@ -98,15 +102,15 @@ While a single call to `MPI_Barrier()` is typically sufficient to synchronise al
 # Environments
 You can install your own environments, eg
  ```bash
- python -m venv pyplot
- source pyplot/bin/activate
+ python -m venv ~/my_env
+ source ~/my_env/bin/activate
  pip install --upgrade pip
  pip install numpy matplotlib jupyter nbterm
  
  ```
  ```bash
  git clone -c feature.manyFiles=true --depth=1 --branch \ 
- releases/v1.0 https://github.com/spack/spack.git spack-v1.0
+ releases/v1.0 https://github.com/spack/spack.git ~/spack-v1.0
  ```
 
 

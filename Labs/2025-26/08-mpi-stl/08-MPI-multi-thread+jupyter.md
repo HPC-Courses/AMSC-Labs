@@ -111,6 +111,12 @@ You can install your own environments, eg
  ```bash
  git clone -c feature.manyFiles=true --depth=1 --branch \ 
  releases/v1.0 https://github.com/spack/spack.git ~/spack-v1.0
+ source ~/spack/share/spack/setup-env.sh 
+ spack info gcc #spack list
+ spack install gcc@15.2.0
+ spack load gcc@15.2.0
+ spack compilers find
+ spack install intel-oneapi-tbb@2022.3.0%gcc@15.2.0
  ```
 
 

@@ -28,7 +28,7 @@ style: |
 
 ```
 . /etc/profile.d/pbs.sh
-qsub -I -q cpu -l select=1:ncpus=6:host=cpu05
+qsub -I -q cpu -l select=1:ncpus=6:mpiprocs=2:host=cpu05
 source /software/spack/share/spack/setup-env.sh
 spack load gcc@15.2.0
 spack load intel-oneapi-tbb@2022.3.0

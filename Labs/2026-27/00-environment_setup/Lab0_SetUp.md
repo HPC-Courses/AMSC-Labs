@@ -126,7 +126,7 @@ where you must replace `/path/to/shared-folder` with the actual path of a folder
 
 **WARNING:** Could be that recent versions of Mac have the following issue `WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested`. To solve this problem substitute the command above with
 ```bash
-docker run --platform linux/amd64 -it --name amsc -v /path/to/shared-folder:/shared-folder quay.io/pjbaioni/amsc_mk:2025 /bin/bash
+docker run --platform linux/amd64 -it --name amsc -v /path/to/shared-folder:/home/ubuntu/shared-folder quay.io/pjbaioni/amsc_mk:2025 /bin/bash
 ```
 
 **WARNING:**  you have to substitute `/path/to/shared-folder` with the path of the folder on your laptop to be shared with the container, for instance `/Users/matteo/polimi/amsc26-27/shared-folder`

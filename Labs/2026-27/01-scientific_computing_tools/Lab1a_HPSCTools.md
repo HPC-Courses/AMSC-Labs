@@ -251,13 +251,69 @@ g++ hello.o main.o -o hello
 
 ---
 ## 3.2 GNU Make
-GNU Make automates compilation and building. We write our own `Makefile`s during the next lab sessions; in the meantime, the most common user commands are
-```bash
-make
-make all
-make clean
-make distclean
+GNU Make automates compilation and building. It reads a file called `Makefile`, which lists the **targets** to build, the **prerequisites** each target depends on, and the **recipe** (the commands) that builds it:
+```makefile
+target: prerequisite1 prerequisite2
+	recipe
 ```
+Make rebuilds a target only if it does not exist, or if any prerequisite is more recent than it: that is exactly the bookkeeping we did by hand in the previous slide. Mind that the recipe lines **must start with a tab**, not with spaces.
+
+The most common user commands are
+```bash
+make            # builds the first target of the Makefile
+make all
+make clean      # removes the intermediate files
+make distclean  # removes everything that was built
+```
+
+---
+### A minimal Makefile
+The `function-hello` directory contains one, `function-hello/Makefile`:
+```makefile
+CXX      = g++
+CXXFLAGS = -Wall -std=c++20 -I .
+
+EXE  = hello
+OBJS = hello.o main.o
+
+all: $(EXE)                       # the first target is the default one
+
+$(EXE): $(OBJS)                   # link: the executable depends on the objects
+	$(CXX) $(OBJS) -o $(EXE)
+
+%.o: %.cpp hello.h                # compile: a pattern rule, one for all the .cpp
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+clean:
+	$(RM) $(OBJS)
+
+distclean: clean
+	$(RM) $(EXE)
+
+.PHONY: all clean distclean       # these targets are not files
+```
+`$<` is the first prerequisite (the `.cpp`), `$@` is the target (the `.o`); `$(RM)` is `rm -f`.
+
+---
+### Try it
+Move to `function-hello` and run `make` twice:
+```bash
+cd ~/shared-folder/AMSC-Labs/Labs/2026-27/01-scientific_computing_tools/function-hello
+make
+./hello
+make
+```
+The second time nothing happens: everything is up to date. Now repeat the experiment of the previous slide, but leave the decisions to make:
+```bash
+touch main.cpp
+make          # only main.o is recompiled, then the link
+touch hello.h
+make          # both objects are recompiled: they depend on hello.h
+make distclean
+ls
+```
+Try also `make -n`, that prints the commands without running them, and change `CXXFLAGS` to `-O3` to see that the flags propagate. Then note the limit of this Makefile: the dependency on `hello.h` is written by hand; for real projects the compiler generates it (`-MMD`), and this is one of the things CMake does for you.
+
 For insights on writing Makefiles, as well as on compiling, especially with mk modules, see
 [https://github.com/pacs-course/pacs-Labs/blob/main/Labs/2025/02-compile/doc/](https://github.com/pacs-course/pacs-Labs/blob/main/Labs/2025/02-compile/doc/)
 

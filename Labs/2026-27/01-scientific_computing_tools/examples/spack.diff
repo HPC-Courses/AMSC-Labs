@@ -1,0 +1,33 @@
+diff --git a/etc/spack/defaults/config.yaml b/etc/spack/defaults/config.yaml
+old mode 100644
+new mode 100755
+index b9c4aee6..7a35e819
+--- a/etc/spack/defaults/config.yaml
++++ b/etc/spack/defaults/config.yaml
+@@ -67,14 +67,14 @@ config:
+   # `spack clean -a`, so it is important that the specified directory uniquely
+   # identifies Spack staging to avoid accidentally wiping out non-Spack work.
+   build_stage:
+-    - $tempdir/$user/spack-stage
+-    - $user_cache_path/stage
++    - /work/spack-0.23/temp/spack-stage #$tempdir/$user/spack-stage
++    - /work/spack-0.23/temp/stage #$user_cache_path/stage
+   # - $spack/var/spack/stage
+ 
+   # Directory in which to run tests and store test results.
+   # Tests will be stored in directories named by date/time and package
+   # name/hash.
+-  test_stage: $user_cache_path/test
++  test_stage: /work/spack-0.23/temp/test #$user_cache_path/test
+ 
+   # Cache directory for already downloaded source tarballs and archived
+   # repositories. This can be purged with `spack clean --downloads`.
+@@ -87,7 +87,7 @@ config:
+ 
+   # Cache directory for miscellaneous files, like the package index.
+   # This can be purged with `spack clean --misc-cache`
+-  misc_cache: $user_cache_path/cache
++  misc_cache: /work/spack-0.23/temp/cache #$user_cache_path/cache
+ 
+ 
+   # Timeout in seconds used for downloading sources etc. This only applies

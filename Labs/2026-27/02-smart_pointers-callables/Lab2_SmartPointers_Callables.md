@@ -14,12 +14,11 @@ Each exercise has an `assignment`, to be completed, and a `solution`. The ✅ **
   - [2. Break it: raw pointers and AddressSanitizer](#2-break-it-raw-pointers-and-addresssanitizer)
   - [3. Predict it: the lifetime of a `unique_ptr`](#3-predict-it-the-lifetime-of-a-unique_ptr)
   - [4. Exercise: who owns the datasets?](#4-exercise-who-owns-the-datasets)
-  - [5. `shared_ptr`, cycles and `weak_ptr`](#5-shared_ptr-cycles-and-weak_ptr)
 - **Part 2 — Callable objects**
-  - [6. The zoo of callables](#6-the-zoo-of-callables)
-  - [7. Lambdas and the standard algorithms](#7-lambdas-and-the-standard-algorithms)
-  - [8. How much does a callable cost?](#8-how-much-does-a-callable-cost)
-  - [9. Exercise: Newton's method](#9-exercise-newtons-method)
+  - [5. The zoo of callables](#5-the-zoo-of-callables)
+  - [6. Lambdas and the standard algorithms](#6-lambdas-and-the-standard-algorithms)
+  - [7. How much does a callable cost?](#7-how-much-does-a-callable-cost)
+  - [8. Exercise: Newton's method](#8-exercise-newtons-method)
 - [Homework](#homework)
 
 ---
@@ -248,50 +247,15 @@ Solution: [`smart_pointers/04-datasets/solution`](smart_pointers/04-datasets/sol
 
 ---
 
-## 5. `shared_ptr`, cycles and `weak_ptr`
-
-`std::shared_ptr<T>` implements **shared ownership**: the object is destroyed when the *last* owner goes away. The owners share a control block with a reference count, so every copy costs an atomic increment. Use it only when there is really no single owner, not to avoid deciding who owns an object. A reference count can never reach zero in a **cycle** (a owns b, b owns a). `std::weak_ptr<T>` observes a shared object without owning it; `lock()` returns a `shared_ptr`, which is empty if the object is already gone.
-
-Compile and run [`smart_pointers/05-shared_weak/shared_weak.cpp`](smart_pointers/05-shared_weak/shared_weak.cpp):
-```bash
-cd ../../05-shared_weak
-g++ -Wall -std=c++20 -g -fsanitize=address shared_weak.cpp -o shared_weak
-./shared_weak
-```
-1. In part 1, explain why `use_count` goes from 1 to 3, and why the `Mesh` is still alive after `mesh.reset()`.
-2. In part 2, which destructors are **not** printed? What does LeakSanitizer report?
-3. Fix the leak by changing **one** type in `struct Node` (see the `TODO`). Which of the two pointers should be the weak one, and why?
-
-✅ **Checkpoint.** After the fix, part 2 ends with
-```
-  a.use_count = 1, b.use_count = 2
-  leaving the scope of a and b
-  - ~Node(a)
-  - ~Node(b)
-```
-and the sanitizer reports no leak. Why is `~Node(a)` printed first, although `b` was declared after `a` and goes out of scope first?
-
-### Which pointer should I use?
-
-| Need | Use |
-|---|---|
-| Use an object someone else owns | `T&`, `T const&`, or `T*` if it may be missing |
-| Exactly one owner | `std::unique_ptr<T>` (return this from factories) |
-| Several independent owners | `std::shared_ptr<T>` |
-| Observe a shared object without keeping it alive | `std::weak_ptr<T>` |
-| A dynamic array | `std::vector<T>` |
-
----
-
 # Part 2 — Callable objects
 
-## 6. The zoo of callables
+## 5. The zoo of callables
 
 A **callable** is anything that can be called as `f(args...)`: a function, a function pointer, a **functor** (a class with `operator()`), a **lambda**, or a `std::function`. A lambda is just a functor written by the compiler for you: the captured variables become its data members, and its body becomes `operator() const`.
 
 [`callables/01-callables/callables.cpp`](callables/01-callables/callables.cpp) writes $f(x) = ax^2 - 2$ in every form. Compile and run it:
 ```bash
-cd ../../callables/01-callables
+cd ../../../callables/01-callables
 g++ -Wall -std=c++20 callables.cpp -o callables
 ./callables
 ```
@@ -304,7 +268,7 @@ Captures at a glance: `[x]` by value, `[&x]` by reference, `[=]`/`[&]` everythin
 
 ---
 
-## 7. Lambdas and the standard algorithms
+## 6. Lambdas and the standard algorithms
 
 The algorithms of `<algorithm>` and `<numeric>` implement the loop once, correctly; you give them the *what* as a lambda:
 
@@ -338,7 +302,7 @@ Watch out for three things:
 
 ---
 
-## 8. How much does a callable cost?
+## 7. How much does a callable cost?
 
 [`callables/03-benchmark/benchmark.cpp`](callables/03-benchmark/benchmark.cpp) integrates $x^2$ on $[0,1]$ with $5\cdot10^7$ points. It passes the integrand in three ways: as a **template** parameter (the compiler knows the function and can inline it), as a **function pointer** (an indirect call), and as a **`std::function`** (type erasure: an indirect call through a wrapper). Run it with three sets of flags:
 ```bash
@@ -361,7 +325,7 @@ Discuss with your neighbour: why does `-ffast-math` speed up only the template v
 
 ---
 
-## 9. Exercise: Newton's method
+## 8. Exercise: Newton's method
 
 Newton's method finds a root of $f$ by iterating
 
@@ -397,8 +361,8 @@ Solution: [`callables/04-newton/solution`](callables/04-newton/solution).
 ## Homework
 
 What is left from the lab, plus some extra exercises:
-- **Section 7**, points 7–9: particles generated by a `mutable` lambda that keeps the next id, sorted by position, and their centre of mass.
-- **Section 9**, the cases marked *at home* in `main.cpp`:
+- **Section 6**, points 7–9: particles generated by a `mutable` lambda that keeps the next id, sorted by position, and their centre of mass.
+- **Section 8**, the cases marked *at home* in `main.cpp`:
   - case 2: implement `Polynomial::derivative()` and find the root of $x^3 - 2x - 5$ starting from $x_0=2$;
   - case 5: print $|x_k - \sqrt2|$ for each iterate. Do the correct digits double at each step?
   - case 6: count the evaluations of $f$ with finite differences and `rtol = 1e-8` (expected: 4 iterations, 13 evaluations). Why does a counter captured by value in a `mutable` lambda **not** compile? (`newton` takes `f` as `F const&`.)

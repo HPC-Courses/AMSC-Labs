@@ -16,9 +16,8 @@ Each exercise has an `assignment`, to be completed, and a `solution`. The ✅ **
   - [4. Exercise: who owns the datasets?](#4-exercise-who-owns-the-datasets)
 - **Part 2 — Callable objects**
   - [5. The zoo of callables](#5-the-zoo-of-callables)
-  - [6. Lambdas and the standard algorithms](#6-lambdas-and-the-standard-algorithms)
-  - [7. How much does a callable cost?](#7-how-much-does-a-callable-cost)
-  - [8. Exercise: Newton's method](#8-exercise-newtons-method)
+  - [6. How much does a callable cost?](#6-how-much-does-a-callable-cost)
+  - [7. Exercise: Newton's method](#7-exercise-newtons-method)
 - [Homework](#homework)
 
 ---
@@ -268,64 +267,40 @@ Captures at a glance: `[x]` by value, `[&x]` by reference, `[=]`/`[&]` everythin
 
 ---
 
-## 6. Lambdas and the standard algorithms
+## 6. How much does a callable cost?
 
-The algorithms of `<algorithm>` and `<numeric>` implement the loop once, correctly; you give them the *what* as a lambda:
-
-| Algorithm | Callable |
-|---|---|
-| `std::generate(b, e, g)` | `g()` produces each element |
-| `std::count_if(b, e, p)`, `std::find_if(b, e, p)` | `p(x) -> bool` |
-| `std::sort(b, e, cmp)`, `std::max_element(b, e, cmp)` | `cmp(a, b) -> bool`, must behave like `<` |
-| `std::transform(b, e, out, f)` | `f(x)` is written to `out` |
-| `std::accumulate(b, e, init, op)`, `std::transform_reduce(...)` | combine the elements |
-| `std::erase_if(v, p)` (C++20) | removes the elements for which `p(x)` is true |
-
-The exercise uses random numbers from `<random>`, which you have not seen yet. You only need two objects: a *generator* of raw random bits, and a *distribution* that turns them into samples. Each call `dist(gen)` returns a new sample and advances the state of `gen`:
-```cpp
-std::mt19937 gen{42};                           // Mersenne Twister, seed 42
-std::normal_distribution<double> dist{0., 1.};  // N(0, 1)
-double x = dist(gen);                           // one sample
-```
-
-Complete **points 1–6** of [`callables/02-stl_lambdas/assignment.cpp`](callables/02-stl_lambdas/assignment.cpp), with one algorithm and one lambda each and no loops:
+[`callables/02-benchmark/benchmark.cpp`](callables/02-benchmark/benchmark.cpp) integrates $x^2$ on $[0,1]$ with $5\cdot10^7$ points. It passes the integrand in three ways: as a **template** parameter, as a **function pointer**, and as a **`std::function`**. Run it without and with optimisation:
 ```bash
-cd ../02-stl_lambdas
-g++ -Wall -std=c++20 assignment.cpp -o assignment && ./assignment
-```
-Watch out for three things:
-- **Point 1**: capture the random generator **by reference**. Try capturing it by value: it does not compile, because drawing a number modifies the generator and `operator()` is `const`.
-- **Point 3**: the comparison must be strict (`>`, never `>=`); otherwise `std::sort` has undefined behaviour.
-- **Point 2**: make the bounds two local variables and capture them.
-
-✅ **Checkpoint.** With the seed `42`, you should get `18 samples in [-1, 1]` and `mean = -0.192323, stddev = 0.680394` (with libstdc++ in the container the samples may differ; the solution prints the reference values). Solution: [`solution.cpp`](callables/02-stl_lambdas/solution.cpp).
-
----
-
-## 7. How much does a callable cost?
-
-[`callables/03-benchmark/benchmark.cpp`](callables/03-benchmark/benchmark.cpp) integrates $x^2$ on $[0,1]$ with $5\cdot10^7$ points. It passes the integrand in three ways: as a **template** parameter (the compiler knows the function and can inline it), as a **function pointer** (an indirect call), and as a **`std::function`** (type erasure: an indirect call through a wrapper). Run it with three sets of flags:
-```bash
-cd ../03-benchmark
+cd ../02-benchmark
 g++ -std=c++20 -O0 benchmark.cpp -o b0 && ./b0
 g++ -std=c++20 -O3 benchmark.cpp -o b3 && ./b3
-g++ -std=c++20 -O3 -ffast-math benchmark.cpp -o bf && ./bf
 ```
 ✅ **Checkpoint.** The absolute times depend on your machine, but the pattern should look like this (ms, measured on a laptop):
 
-| | `-O0` | `-O3` | `-O3 -ffast-math` |
-|---|---|---|---|
-| template + lambda | 175 | 44 | **13** |
-| function pointer | 174 | 47 | 46 |
-| `std::function` | **341** | 59 | 59 |
+| | `-O0` | `-O3` |
+|---|---|---|
+| template + lambda | 172 | **43** |
+| template + function | 173 | **43** |
+| function pointer | 173 | 46 |
+| `std::function` | **339** | 59 |
 
-Discuss with your neighbour: why does `-ffast-math` speed up only the template version? Hint: `-ffast-math` allows the compiler to reorder the sum, and hence to **vectorise** it, but only when the body of the integrand is visible inside the loop.
+Discuss with your neighbour:
+1. Why is `std::function` twice as slow as the others at `-O0`?
+2. At `-O3`, which version is the fastest, and why?
+
+<details>
+<summary>Answers</summary>
+
+1. At `-O0` the compiler does not optimise anything: every call is a real function call. A function pointer costs one call per point; `std::function` hides the callable behind a few layers of wrapper functions, and each layer is one more call.
+2. The two template versions. With a template parameter the compiler generates a version of `midpoint_template` for that specific callable, so it knows exactly which function is called and can copy its body (`x * x`) inside the loop (*inlining*): no call is left at all. With a function pointer or a `std::function` the function to call is chosen at run time, so the compiler cannot inline it and every iteration still pays for a call. At `-O3` the layers of `std::function` are optimised away, and what is left is an indirect call, like with a function pointer. Here the gain of the template is small because the integrand is very cheap; once the body is inlined, though, the compiler can optimise the loop further, which is impossible through a pointer.
+
+</details>
 
 **Take-away:** take the callable as a template parameter in the inner loops that must be fast. Use `std::function` when you need to *store* callables of different types, e.g. as a class member.
 
 ---
 
-## 8. Exercise: Newton's method
+## 7. Exercise: Newton's method
 
 Newton's method finds a root of $f$ by iterating
 
@@ -335,9 +310,9 @@ $$x_{k+1}=x_{k}-\frac{f(x_{k})}{f'(x_{k})},$$
 
 and stops when $|f(x_k)|<$ `rtol`, or $|x_k-x_{k-1}|<$ `stol`, or after `max_iter` iterations (in which case it has *not* converged). Close to a simple root, the convergence is quadratic.
 
-In [`callables/04-newton/assignment`](callables/04-newton/assignment), `newton.hpp` contains `NewtonOptions`, which collects the parameters (with defaults), `NewtonResult`, the output (root, iterations, residual, whether it converged, and the history of the iterates), and the function `newton` to be completed.
+In [`callables/03-newton/assignment`](callables/03-newton/assignment), `newton.hpp` contains `NewtonOptions`, which collects the parameters (with defaults), `NewtonResult`, the output (root, iterations, residual, whether it converged, and the history of the iterates), and the function `newton` to be completed.
 ```bash
-cd ../04-newton/assignment
+cd ../03-newton/assignment
 make run
 ```
 **Your tasks**:
@@ -354,19 +329,50 @@ lambda, sqrt(3)              root = 1.73205080756888, iterations = 5, residual =
 lambda, sqrt(5)              root = 2.23606797749998, iterations = 5, residual = 8.43e-13
 finite differences           root = 1.4142135623731, iterations = 5, residual = 2.73e-16
 ```
-Solution: [`callables/04-newton/solution`](callables/04-newton/solution).
+Solution: [`callables/03-newton/solution`](callables/03-newton/solution).
 
 ---
 
 ## Homework
 
 What is left from the lab, plus some extra exercises:
-- **Section 6**, points 7–9: particles generated by a `mutable` lambda that keeps the next id, sorted by position, and their centre of mass.
-- **Section 8**, the cases marked *at home* in `main.cpp`:
+- **Lambdas and the standard algorithms**: the [exercise below](#exercise-lambdas-and-the-standard-algorithms).
+- **Section 7**, the cases marked *at home* in `main.cpp`:
   - case 2: implement `Polynomial::derivative()` and find the root of $x^3 - 2x - 5$ starting from $x_0=2$;
   - case 5: print $|x_k - \sqrt2|$ for each iterate. Do the correct digits double at each step?
   - case 6: count the evaluations of $f$ with finite differences and `rtol = 1e-8` (expected: 4 iterations, 13 evaluations). Why does a counter captured by value in a `mutable` lambda **not** compile? (`newton` takes `f` as `F const&`.)
 - **Other methods.** Implement the secant method, which replaces $f'(x_k)$ with $\frac{f(x_k)-f(x_{k-1})}{x_k-x_{k-1}}$, and the bisection method, which needs an interval $[a,b]$ with $f(a)f(b)<0$, as function templates returning a `NewtonResult`, and compare the number of iterations of the three methods on the same function.
 - **Advanced.** Use the recursive lambda `numDeriv<N>` from the lecture to implement Halley's method, $x_{k+1} = x_k - \frac{2ff'}{2f'^2 - ff''}$, and check that it converges cubically.
+
+### Exercise: lambdas and the standard algorithms
+
+The algorithms of `<algorithm>` and `<numeric>` implement a loop once, correctly; you give them *what* to do as a lambda:
+
+| Algorithm | Callable |
+|---|---|
+| `std::count_if(b, e, p)`, `std::find_if(b, e, p)` | `p(x) -> bool` |
+| `std::sort(b, e, cmp)` | `cmp(a, b) -> bool`, must behave like `<` |
+| `std::transform(b, e, out, f)` | `f(x)` is written to `out` |
+| `std::accumulate(b, e, init)` | sums the elements, starting from `init` |
+| `std::erase_if(v, p)` (C++20) | removes the elements for which `p(x)` is true |
+
+Complete the TODOs of [`callables/04-stl_lambdas/assignment.cpp`](callables/04-stl_lambdas/assignment.cpp), with one algorithm and one lambda each, and no loops:
+```bash
+cd callables/04-stl_lambdas
+g++ -Wall -std=c++20 assignment.cpp -o assignment && ./assignment
+```
+In point 2 the comparison must be **strict** (`>`, never `>=`): otherwise `std::sort` has undefined behaviour.
+
+✅ **Checkpoint.**
+```
+values: 0.5 -1.2 2.3 -0.4 1.8 -2.1 0.9 0.1 -0.7 1.5
+5 values in [-1, 1]
+sorted by |x|: 2.3 -2.1 1.8 1.5 -1.2 0.9 -0.7 0.5 -0.4 0.1
+mean = 0.27
+minus the mean: 2.03 -2.37 1.53 1.23 -1.47 0.63 -0.97 0.23 -0.67 -0.17
+non negative: 2.03 1.53 1.23 0.63 0.23
+first particle with mass > 4: id 5, x = 1.1
+```
+Solution: [`solution.cpp`](callables/04-stl_lambdas/solution.cpp).
 
 **Further reading** in [`AMSC-CodeExamples/Examples/src`](https://github.com/HPC-Courses/AMSC-CodeExamples/tree/AMSC/Examples/src): [`SmartPointers`](https://github.com/HPC-Courses/AMSC-CodeExamples/tree/AMSC/Examples/src/SmartPointers), [`Functors`](https://github.com/HPC-Courses/AMSC-CodeExamples/tree/AMSC/Examples/src/Functors), [`LambdaExpr`](https://github.com/HPC-Courses/AMSC-CodeExamples/tree/AMSC/Examples/src/LambdaExpr), [`Derivatives`](https://github.com/HPC-Courses/AMSC-CodeExamples/tree/AMSC/Examples/src/Derivatives).

@@ -8,7 +8,6 @@ The same midpoint quadrature rule, with the integrand passed as
 compile and run with different optimisation levels:
   g++ -Wall -std=c++20 -O0 benchmark.cpp -o benchmark_O0 && ./benchmark_O0
   g++ -Wall -std=c++20 -O3 benchmark.cpp -o benchmark_O3 && ./benchmark_O3
-  g++ -Wall -std=c++20 -O3 -ffast-math benchmark.cpp -o benchmark_fast && ./benchmark_fast
 */
 
 #include <algorithm>

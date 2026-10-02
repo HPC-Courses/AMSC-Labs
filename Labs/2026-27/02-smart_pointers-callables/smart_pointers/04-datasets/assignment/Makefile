@@ -5,8 +5,8 @@
 CXX      = g++
 CXXFLAGS = -Wall -Wextra -std=c++20 -g
 # Uncomment to enable AddressSanitizer
-# CXXFLAGS += -fsanitize=address
-# LDFLAGS  += -fsanitize=address
+CXXFLAGS += -fsanitize=address
+LDFLAGS  += -fsanitize=address
 
 EXE  = datasets
 OBJS = datasets.o main.o

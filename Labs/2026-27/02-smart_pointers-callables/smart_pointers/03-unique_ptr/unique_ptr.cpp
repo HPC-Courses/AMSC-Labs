@@ -58,7 +58,7 @@ int main() {
 
   std::cout << "2. move" << std::endl;
   auto b = std::make_unique<Tracer>("b");
-  // auto c = b;  // ERROR: copy constructor is deleted. Try it!
+  //auto c = b;  // ERROR: copy constructor is deleted. Try it!
   auto c = std::move(b);
   std::cout << "  b is " << (b ? "not empty" : "empty") << ", c owns " << c->name() << std::endl;
 
@@ -84,6 +84,7 @@ int main() {
     std::vector<std::unique_ptr<Tracer>> v;
     v.push_back(std::make_unique<Tracer>("v0"));
     v.emplace_back(std::make_unique<Tracer>("v1"));
+    // for (auto p : v)
     for (auto const &p : v) // by reference: a copy would not compile
       print(*p);
     std::cout << "  leaving the scope of v" << std::endl;

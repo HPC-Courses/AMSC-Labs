@@ -19,36 +19,37 @@ int main(int argc, char **argv) {
 
   // 1. Read
   // TODO: which element type? Who deletes the datasets?
-  std::vector<Dataset *> all;
+  std::vector<std::unique_ptr<Dataset>> all;
   std::string line;
   while (std::getline(file, line)) {
     if (line.empty() || line[0] == '#')
       continue;
     std::istringstream iss{line};
-    Dataset *d = read_dataset(iss);
+    std::unique_ptr<std::unique_ptr<Dataset>> d = read_dataset(iss);
+
     if (d)
-      all.push_back(d);
+      all.push_back(std::move(d));
     else
       std::cerr << "Skipping invalid line: " << line << std::endl;
   }
   // TODO: write a function print_all(title, datasets) that prints name, number of
   //       values and mean of each dataset. How should the vector be passed?
-  for (Dataset *d : all)
+  for (std::unique_ptr<Dataset> const &d : all)
     std::cout << "  " << d->name << ", " << d->values.size() << " values, mean " << mean(*d) << std::endl;
 
   // 2. The datasets with mean > 10 go to another vector
   // TODO: now "all" and "large" point to the same objects. Who owns them?
   //       Transfer the ownership instead, and remove the empty pointers from "all"
-  std::vector<Dataset *> large;
-  for (Dataset *d : all)
+  std::vector<std::unique_ptr<Dataset>> large;
+  for (std::unique_ptr<Dataset> const &d : all)
     if (mean(*d) > 10.)
-      large.push_back(d);
+      large.push_back(std::move(d));
 
   // 3. TODO: find the dataset with the largest mean in "large" (std::max_element
   //          and a lambda) and print its name, keeping a non-owning pointer to it
 
   // Cleanup: is this correct? What if we also deleted the elements of "large"?
-  for (Dataset *d : all)
+  for (std::unique_ptr<Dataset> const &d : all)
     delete d;
   return 0;
 }

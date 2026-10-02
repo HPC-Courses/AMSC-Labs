@@ -1,9 +1,9 @@
 #include "datasets.hpp"
-
 #include <numeric>
+#include <memory>
 
-Dataset *read_dataset(std::istream &in) {
-  Dataset *d = new Dataset; // TODO: no naked new
+std::unique_ptr<Dataset> read_dataset(std::istream &in) {
+  std::unique_ptr<Dataset> d = std::make_unique<Dataset>();
   if (!(in >> d->name))
     return nullptr;
   double v;

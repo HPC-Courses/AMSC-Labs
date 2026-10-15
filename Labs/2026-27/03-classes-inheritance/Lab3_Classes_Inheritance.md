@@ -267,14 +267,14 @@ copy: Rectangle, reference: Square
 Solution: [`inheritance/01-shapes/solution`](inheritance/01-shapes/solution).
 
 **Now break it**, one change at a time:
-1. Remove `virtual` from the destructor of `Shape`, and run again. AddressSanitizer reports a `new-delete-type-mismatch`: 16 bytes were allocated, 8 are freed. Which destructor does the `unique_ptr<Shape>` call? And what are the 16 bytes of a `Circle`, if it only has one `double`? (Hint: how does the program know at run time which `area()` to call?)
+1. Give `Circle` a destructor that prints its name, `~Circle() { std::cout << "~Circle" << std::endl; }` (include `<iostream>` in `shapes.hpp`), and run: `~Circle` is printed once per circle. Now remove `virtual` from the destructor of `Shape`, and run again: `~Circle` is no longer printed. Which destructor does the `unique_ptr<Shape>` call? What would happen if `Circle` owned a resource, e.g. a `std::vector`? Read also the compiler warning.
 2. Look at the last lines of `main`: a `Square` copied into a `Rectangle` object prints `Rectangle`, because only its `Rectangle` part was copied (**slicing**). Through a reference, instead, it is still a `Square`. This is why polymorphic objects are passed by reference or pointer, never by value.
 
 <details>
 <summary>Answers</summary>
 
 - Task 2: `Square` only needs its constructor and `name()`: area and perimeter of a `Rectangle` are already right. It does not need to check `side` either: its constructor calls the one of `Rectangle`, which throws if `side` is not positive, so `square -1.0` is rejected too. `Rectangle` cannot be `final`, since `Square` derives from it.
-- Break it 1: the destructor of `Shape` only, since it is not virtual. Deleting a derived object through a pointer to the base without a virtual destructor is undefined behaviour. A `Circle` contains, besides `radius_`, a hidden pointer to the *virtual table* of its class, the table of its virtual functions: this is how a call through a `Shape &` finds `Circle::area()`. (Some compilers also warn at compile time, others do not: the sanitizer is the safe net.)
+- Break it 1: the `unique_ptr<Shape>` deletes a `Shape *`, so without `virtual` only the destructor of `Shape` is called, and the one of `Circle` never runs. Here nothing visible is lost, since a `Circle` only holds a `double`; but if a derived class owned a resource (a `std::vector`, an open file, memory allocated with `new`), it would never be released: a **leak**. Formally, deleting a derived object through a pointer to the base without a virtual destructor is undefined behaviour, and with some compilers AddressSanitizer also stops the program. The rule: a class with virtual functions must have a virtual destructor.
 
 </details>
 

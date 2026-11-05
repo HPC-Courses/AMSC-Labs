@@ -1,8 +1,8 @@
-# Laboratory 06 — The cluster and templates
+# Laboratory 06 — The cluster, algorithms and templates
 
 ### 06/11/2026
 
-In the first part of this lab we log in to the HPC cluster and use **PBS**, the program that decides when and where our jobs run. In the second part we put into practice the lecture *More on templates*, with an exercise on the derivatives of a function.
+In the first part of this lab we log in to the HPC cluster and use **PBS**, the program that decides when and where our jobs run. Then we put into practice two lectures: the algorithms of the Standard Library, on the nodes of a 1D mesh, and *More on templates*, with an exercise on the derivatives of a function.
 
 Each exercise has an `assignment`, to be completed, and a `solution`. The ✅ **Checkpoint** at the end of each section shows the output you should get. Whatever you do not finish in class is listed in the [Homework](#homework).
 
@@ -10,7 +10,8 @@ Each exercise has an `assignment`, to be completed, and a `solution`. The ✅ **
 
 - [0. Setup](#0-setup)
 - [1. The cluster and PBS](#1-the-cluster-and-pbs)
-- [2. Exercise: derivatives of any order](#2-exercise-derivatives-of-any-order)
+- [2. More algorithms](#2-more-algorithms)
+- [3. Exercise: derivatives of any order](#3-exercise-derivatives-of-any-order)
 - [Homework](#homework)
 
 ---
@@ -130,7 +131,66 @@ A batch job has no terminal, so what it prints has to go to a file. PBS should c
 
 ---
 
-## 2. Exercise: derivatives of any order
+## 2. More algorithms
+
+In [Lab 5](../05-sparse_matrix-algorithms/Lab5_SparseMatrix_Algorithms.md) we used the algorithms that *read* a range and compute a result, such as `std::accumulate`, `std::count_if` and `std::max_element`. Today we use the ones that *reorganise* a range, on the nodes of a 1D mesh (slides 78–91 of *The Standard Library*).
+
+| Algorithm | Header | What it does |
+|---|---|---|
+| `std::unique(b, e)` | `<algorithm>` | removes the **consecutive** duplicates and returns the new end (slide 91) |
+| `std::adjacent_difference(b, e, out)` | `<numeric>` | `out[0] = a[0]`, then `out[i] = a[i] - a[i-1]` (slide 84) |
+| `std::adjacent_difference(b, e, out, f)` | `<numeric>` | the same, with `f(a[i], a[i-1])` instead of the difference |
+| `std::minmax_element(b, e)` | `<algorithm>` | a pair of iterators: to the smallest and to the largest element |
+| `std::upper_bound(b, e, x)` | `<algorithm>` | in a **sorted** range, the first element larger than `x`, in $O(\log n)$. `std::lower_bound` (Lab 5) returns the first one that is not smaller |
+| `std::merge(b1, e1, b2, e2, out)` | `<algorithm>` | writes two **sorted** ranges into `out`, sorted |
+
+> **An algorithm cannot change the size of a container.** It only sees two iterators, not the vector: it can move the elements, but it cannot remove them. `std::unique` and `std::remove_if` move the elements to keep to the front, and return an iterator to the new end; the elements after it are still there, with an unspecified value. To really remove them you must call the `erase` of the vector, from the new end to `v.end()`.
+
+A mesh divides an interval into **elements**: element $i$ is the interval $[x_i, x_{i+1})$ between two consecutive nodes, and its size is $h_i = x_{i+1} - x_i$. With $n$ nodes there are $n - 1$ elements:
+```text
+nodes      x0 ------ x1 ------ x2 ------ x3
+elements   |    0    |    1    |    2    |
+```
+
+In [`algorithms/01-mesh/assignment.cpp`](algorithms/01-mesh/assignment.cpp), `nodes` contains the nodes of two meshes of $[0, 1]$, put together: they are not sorted, and some are repeated.
+```bash
+cd algorithms/01-mesh
+g++ -Wall -std=c++20 assignment.cpp -o assignment && ./assignment
+```
+
+**Your tasks**:
+1. Sort `nodes` and remove the duplicates, with `std::sort`, `std::unique` and `erase`.
+2. The sizes $h_i$ of the elements, with `std::adjacent_difference`. Which is the first number that it writes?
+3. The smallest and the largest size, with one call to `std::minmax_element`.
+4. Write `element_of(nodes, x)`, which returns the index $i$ of the element $[x_i, x_{i+1})$ that contains `x`, with `std::upper_bound`. For example, `x = 0.3` is in $[0.25, 0.5)$, so the result is 1. What does it return for `x = 1`?
+5. *(If you have time)* Refine the mesh: compute the midpoints of the elements with `std::adjacent_difference` and a lambda, then put them together with the nodes with `std::merge`.
+6. **Now break it**: comment out `erase` and print `nodes`. Then put `erase` back, and comment out `std::sort`. Do you get an error? What is `hmin`?
+
+✅ **Checkpoint.**
+```
+Exercise 1: PASSED
+Exercise 2: PASSED
+Exercise 3: PASSED
+Exercise 4: PASSED
+Exercise 5: PASSED
+```
+Solution: [`solution.cpp`](algorithms/01-mesh/solution.cpp).
+
+<details>
+<summary>Answers</summary>
+
+- 1: `nodes.erase(std::unique(nodes.begin(), nodes.end()), nodes.end());`, after the sort.
+- 2: the first number written is `nodes[0]`, which is not a difference: remove it with `h.erase(h.begin());`.
+- 3: `const auto [smallest, largest] = std::minmax_element(h.begin(), h.end());`. They are iterators: the values are `*smallest` and `*largest`.
+- 4: the 6 nodes define 5 elements, the intervals between two consecutive nodes: element $i$ is $[x_i, x_{i+1})$, with $i = 0, \dots, 4$. `upper_bound` returns the first node larger than `x`, which is the right end of the element, so the index is `std::distance(nodes.begin(), it) - 1`. For example, for `x = 0.3` it returns the node 0.5, which has index 2, so `x` is in element 1, $[0.25, 0.5)$. For `x = 1` no node is larger: it returns `end()`, and `element_of` returns 5, an element that does not exist. A real code must handle this case, e.g. by returning the last element.
+- 5: `[](double right, double left) { return 0.5 * (left + right); }`, then remove the first number as in task 2. `std::merge` needs a `std::back_inserter(refined)`, as `copy_if` in Lab 5.
+- 6: without `erase`, `nodes` still has 9 entries, `0 0.25 0.5 0.75 0.875 1 0.875 1 1`: the last three are what is left behind `unique`. Without the sort there is no error at all: no two equal nodes are consecutive, so `unique` removes nothing, and `hmin` is $-0.75$, a negative size. `unique`, `upper_bound` and `merge` do not check that the range is sorted: it is your responsibility, as in Lab 5 with `lower_bound`.
+
+</details>
+
+---
+
+## 3. Exercise: derivatives of any order
 
 This exercise puts into practice the lecture *More on templates*: unless otherwise stated, the slides are the ones of that lecture.
 
@@ -163,7 +223,7 @@ The classes are in [`templates/01-derivatives/assignment/derivatives.hpp`](templ
 ### Step 1 — The end of the recursion
 
 ```bash
-cd templates/01-derivatives/assignment
+cd ../../templates/01-derivatives/assignment
 make
 ```
 It does not compile: `fatal error: template instantiation depth exceeds maximum of 900`. Read the code of `NthDerivative`: why?
@@ -264,7 +324,7 @@ Solution: [`templates/01-derivatives/solution`](templates/01-derivatives/solutio
 ## Homework
 
 Each exercise has a difficulty label: **[Easy]**, **[Intermediate]** or **[Hard]**.
-- **Sections 1–2**, if you did not finish them in class.
+- **Sections 1–3**, if you did not finish them in class.
 - **[Easy]** — **A third difference.** Add to `derivatives.hpp` a type `Centered`, with $D^0 f(x) = \dfrac{f(x + h) - f(x - h)}{2h}$. Which is its `Other`? What does `operator()` become? With `NthDerivative<N, F, double, Centered>`, what is the `ratio` for $N = 1, 2, 3$? For $N = 2$, compare the error with the one of Step 3: which formula do you get?
 - **[Easy]** — **Ranges and projections** (slide 78 of *The Standard Library*). The algorithms in `std::ranges` take the container, and a *projection*: the member to look at. In the `Particle` exercise of Lab 2, sort the particles by position with `std::ranges::sort`, and find the heaviest one with `std::ranges::max_element`, without writing any lambda.
 - **[Easy]** — **Predict it: SFINAE** (slides 7–8 of *More on templates*). Before running [`templates/03-sfinae/sfinae.cpp`](templates/03-sfinae/sfinae.cpp), predict what each line prints. Then remove the first overload of `f`: why does the failure become an error?

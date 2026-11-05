@@ -1,0 +1,21 @@
+#!/bin/bash
+#PBS -q cpu
+#PBS -l select=1:ncpus=1
+#PBS -l walltime=00:05:00
+#PBS -N derivatives
+
+# The job starts in your home: move to the folder where you ran qsub
+cd $PBS_O_WORKDIR
+
+# Everything this script prints goes to this file, errors included
+exec &> derivatives.$PBS_JOBID.out
+
+# The compiler
+source /software/spack/share/spack/setup-env.sh
+spack load gcc@15.2.0
+gcc --version | head -1
+
+# Each job has its own executable: two jobs in this folder may run at the same time
+g++ -Wall -std=c++20 -O2 solution/main.cpp -o main.$PBS_JOBID
+./main.$PBS_JOBID
+rm main.$PBS_JOBID

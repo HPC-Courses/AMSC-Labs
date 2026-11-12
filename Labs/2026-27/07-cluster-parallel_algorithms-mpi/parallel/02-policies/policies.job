@@ -1,0 +1,24 @@
+#!/bin/bash
+#PBS -q cpu
+#PBS -l select=1:ncpus=8
+#PBS -l walltime=00:05:00
+#PBS -N policies
+
+# The job starts in your home: move to the folder where you ran qsub
+cd $PBS_O_WORKDIR
+
+# Everything this script prints goes to this file, errors included
+exec &> policies.$PBS_JOBID.out
+
+# How many CPUs PBS has reserved for this job
+echo "CPUs reserved: $NCPUS"
+
+# The compiler and TBB
+source /software/spack/share/spack/setup-env.sh
+spack load gcc@15.2.0
+spack load intel-oneapi-tbb@2022.3.0
+
+# Each job has its own executable: two jobs in this folder may run at the same time
+g++ -Wall -std=c++20 -O3 solution.cpp -o solution.$PBS_JOBID -ltbb
+./solution.$PBS_JOBID
+rm solution.$PBS_JOBID

@@ -1,17 +1,16 @@
-# Laboratory 06 — The cluster, algorithms and templates
+# Laboratory 06 — Algorithms and templates
 
 ### 06/11/2026
 
-In the first part of this lab we log in to the HPC cluster and use **PBS**, the program that decides when and where our jobs run. Then we put into practice two lectures: the algorithms of the Standard Library, on the nodes of a 1D mesh, and *More on templates*, with an exercise on the derivatives of a function.
+In this lab we put into practice two lectures: the algorithms of the Standard Library, on the nodes of a 1D mesh, and *More on templates*, with an exercise on the derivatives of a function.
 
 Each exercise has an `assignment`, to be completed, and a `solution`. The ✅ **Checkpoint** at the end of each section shows the output you should get. Whatever you do not finish in class is listed in the [Homework](#homework).
 
 ## Outline
 
 - [0. Setup](#0-setup)
-- [1. The cluster and PBS](#1-the-cluster-and-pbs)
-- [2. More algorithms](#2-more-algorithms)
-- [3. Exercise: derivatives of any order](#3-exercise-derivatives-of-any-order)
+- [1. More algorithms](#1-more-algorithms)
+- [2. Exercise: derivatives of any order](#2-exercise-derivatives-of-any-order)
 - [Homework](#homework)
 
 ---
@@ -22,116 +21,12 @@ Update the repository and move to the directory of this lab, inside the containe
 ```bash
 cd ~/shared-folder/AMSC-Labs
 git pull
-cd Labs/2026-27/06-cluster-templates
+cd Labs/2026-27/06-algorithms-templates
 ```
 
 ---
 
-## 1. The cluster and PBS
-
-A cluster is a set of computers, the **nodes**. You log in to the **login node**, where you edit files and submit jobs. Everything else, compilation included, runs on the **compute nodes**: you ask for them to **PBS**, which runs your job when the resources you asked for are free.
-
-> **Never compile or run your computations on the login node**: it is shared by all the users of the cluster, and a process that uses too much CPU there is killed automatically.
-
-### 1.1 Log in
-
-You need the account you asked for at the end of [Lab 4](../04-class_templates-stl/Lab4_ClassTemplates_STL.md#before-the-next-lab-access-to-the-cluster) and the VPN. The address of the cluster is in the manual on [WeBeep](https://webeep.polimi.it/course/view.php?id=14384). Your username is `u` followed by your person code, e.g. `u12345678`.
-
-**Your tasks**:
-1. From the terminal of your laptop (not from the container), log in to the cluster with `ssh` (Lab 1, section 1.3). Run `hostname`: this is the login node.
-2. Clone the repository of the labs in your home:
-   ```bash
-   git clone https://github.com/HPC-Courses/AMSC-Labs.git
-   ```
-
-### 1.2 The PBS commands
-
-When you log in, the PBS commands are not in the `PATH`. Run `. /etc/profile.d/pbs.sh` **in every new terminal**, or use the full path of the commands, e.g. `/opt/pbs/bin/pbsnodes -aSj`.
-
-| Command | What it does |
-|---|---|
-| `pbsnodes -aSj` | shows the nodes, and how many of their CPUs are free |
-| `qstat` | shows the jobs in the queues; `qstat -u $(whoami)` only yours |
-| `qstat -Qf cpu` | shows the limits of the queue `cpu` |
-| `qsub` | submits a job |
-| `qdel <job id>` | deletes a job you submitted |
-
-**Your task**: run `pbsnodes -aSj`. How many nodes are there? What are their names? Then run `qstat -Qf cpu`: how many CPUs can a job ask for, at most?
-
-<details>
-<summary>Answers</summary>
-
-7 nodes with 112 CPUs each: `cpu01`, ..., `cpu05` and `gpu01`, `gpu02`. The queue `cpu` contains the 5 `cpu` nodes. A job can ask for at most 28 CPUs (`resources_max.ncpus`) and 48 hours, and each user can run at most 4 jobs at the same time (`max_user_run`).
-
-</details>
-
-### 1.3 An interactive job
-
-`qsub -I` (capital `i`) asks for an **interactive** job: PBS gives you a shell on a compute node. Exit with `ctrl+D`. You choose the queue with `-q` and the resources with `-l`, e.g. two CPUs for ten minutes:
-```bash
-qsub -I -q cpu -l select=1:ncpus=2 -l walltime=00:10:00
-```
-`select=1` asks for one *chunk* of resources, and after the `:` you say what it contains. The walltime is the maximum duration of the job.
-
-Always write the queue and the walltime: `qsub -I -l select=1:ncpus=2` goes to the default queue, `interactive`, and is refused with `Job violates queue and/or server resource limits`.
-
-On the nodes, the compiler and the libraries are installed with **spack** (Lab 1, section 5.2):
-```bash
-source /software/spack/share/spack/setup-env.sh
-spack load gcc@15.2.0
-which gcc
-gcc --version
-```
-
-**Your tasks**:
-1. Start an interactive job with 2 CPUs. Run `hostname` and `echo $NCPUS`, the number of CPUs of the job. From another terminal on the login node, run `qstat -u $(whoami)`: do you see your job?
-2. Inside the job, load gcc with spack. Compare `which gcc` with the one of the login node. Exit with `ctrl+D`.
-
-✅ **Checkpoint.** Inside the job, `hostname` prints a compute node, e.g. `cpu04.mate.polimi.it`, `echo $NCPUS` prints `2`, `which gcc` prints a path inside `/software`, and `gcc --version` prints `15.2.0`.
-
-### 1.4 Batch jobs
-
-For a real computation you write a **job script**: a bash script whose first lines, starting with `#PBS`, contain the options of `qsub`. PBS runs it when the resources are free, also when you are not logged in. [`cluster/1_specific_hosts.job`](cluster/1_specific_hosts.job):
-```bash
-#!/bin/bash
-#PBS -q cpu
-#PBS -l select=1:ncpus=1:host=cpu04+1:ncpus=1:host=cpu05
-#PBS -l walltime=00:01:00
-#PBS -N hello_pbs
-echo "hello from pbs on node $(hostname)" &> $HOME/hello.from.pbs
-# Keeps the job alive for a while, so that you can see it in qstat
-sleep 30
-```
-It asks for two chunks, one CPU on `cpu04` and one on `cpu05`, for at most one minute; `-N` is the name of the job in `qstat`. [`cluster/2_scatter.job`](cluster/2_scatter.job) asks for 3 chunks, `place=scatter` puts them on different nodes, and the script prints the names of the nodes, which PBS writes in the file `$PBS_NODEFILE`.
-
-Every option of a script can also be written on the command line of `qsub`, and vice versa: `-l select=1:ncpus=2` on the command line is the line `#PBS -l select=1:ncpus=2` of a script.
-
-A batch job has no terminal, so what it prints has to go to a file. PBS should collect it in `<job name>.o<job id>` and `<job name>.e<job id>`, but on this cluster these files may not arrive: our scripts write their output to a file themselves, with `&>`.
-
-**Your tasks**:
-1. Submit the first script and look at the queue. The column `S` is the state: `Q` waiting, `R` running, `E` ending.
-   ```bash
-   cd ~/AMSC-Labs/Labs/2026-27/06-cluster-templates/cluster
-   qsub 1_specific_hosts.job
-   qstat -u $(whoami)
-   ```
-2. When it is over, read `~/hello.from.pbs`. The job has two nodes: how many lines are in the file?
-3. Submit the second script, and read `~/hello.scatter.<job id>`. Who has written these lines?
-4. Submit the first script again, and delete it with `qdel` before it ends.
-
-✅ **Checkpoint.** `~/hello.from.pbs` contains `hello from pbs on node cpu04.mate.polimi.it`; `~/hello.scatter.<job id>` contains 3 lines, with 3 different nodes.
-
-<details>
-<summary>Answers</summary>
-
-- 2: one line. The script runs **only on the first node** of the job: the CPU on `cpu05` is reserved, but nothing runs there.
-- 3: the first node again: it only reads the names of the 3 nodes. To start a program on all the nodes of a job you need a launcher such as `mpirun`, which we will see with MPI.
-
-</details>
-
----
-
-## 2. More algorithms
+## 1. More algorithms
 
 In [Lab 5](../05-sparse_matrix-algorithms/Lab5_SparseMatrix_Algorithms.md) we used the algorithms that *read* a range and compute a result, such as `std::accumulate`, `std::count_if` and `std::max_element`. Today we use the ones that *reorganise* a range, on the nodes of a 1D mesh (slides 78–91 of *The Standard Library*).
 
@@ -190,7 +85,7 @@ Solution: [`solution.cpp`](algorithms/01-mesh/solution.cpp).
 
 ---
 
-## 3. Exercise: derivatives of any order
+## 2. Exercise: derivatives of any order
 
 This exercise puts into practice the lecture *More on templates*: unless otherwise stated, the slides are the ones of that lecture.
 
@@ -281,10 +176,6 @@ h        N = 2      N = 4
 ```
 Solution: [`templates/01-derivatives/solution`](templates/01-derivatives/solution).
 
-### Step 6 — On the cluster (if you have time)
-
-[`derivatives.job`](templates/01-derivatives/derivatives.job) compiles `solution` on a compute node, with the gcc of spack, and runs it. In the terminal connected to the cluster, update the repository with `git pull`, move to `~/AMSC-Labs/Labs/2026-27/06-cluster-templates/templates/01-derivatives` and submit it with `qsub derivatives.job`. When `qstat -u $(whoami)` no longer shows it, read `derivatives.<job id>.out`.
-
 <details>
 <summary>Answers</summary>
 
@@ -315,7 +206,6 @@ Solution: [`templates/01-derivatives/solution`](templates/01-derivatives/solutio
   ```
   `N` comes first because it is the one we write: `F` and `T` are deduced from the arguments. In `d2_float`, `T` is `float`, because `1e-3f` is a `float`, and `f` is a generic lambda, so it computes in `float` too. A `float` has about 7 significant digits: too few to divide by $h^2 = 10^{-6}$.
 - Step 5: the truncation error decreases with $h$, but $f(x + h) - f(x)$ is a difference of two very close numbers, and each division by $h$ amplifies its round-off error: the error is about $\varepsilon / h^N$, with $\varepsilon \approx 10^{-16}$. For $N = 4$ and $h = 10^{-4}$, $\varepsilon / h^4 \approx 1$. The best $h$ is about $10^{-4}$ for $N = 2$, and $10^{-2}$ for $N = 4$. Each order calls the previous one twice, so $f$ is called $2^N = 16$ times.
-- Step 6: the first line of the output is the version of the compiler, 15.2.0, and the table has the same pattern as on your laptop. The code is compiled on the compute node, never on the login node.
 
 </details>
 
@@ -324,7 +214,7 @@ Solution: [`templates/01-derivatives/solution`](templates/01-derivatives/solutio
 ## Homework
 
 Each exercise has a difficulty label: **[Easy]**, **[Intermediate]** or **[Hard]**.
-- **Sections 1–3**, if you did not finish them in class.
+- **Sections 1–2**, if you did not finish them in class.
 - **[Easy]** — **A third difference.** Add to `derivatives.hpp` a type `Centered`, with $D^0 f(x) = \dfrac{f(x + h) - f(x - h)}{2h}$. Which is its `Other`? What does `operator()` become? With `NthDerivative<N, F, double, Centered>`, what is the `ratio` for $N = 1, 2, 3$? For $N = 2$, compare the error with the one of Step 3: which formula do you get?
 - **[Easy]** — **Ranges and projections** (slide 78 of *The Standard Library*). The algorithms in `std::ranges` take the container, and a *projection*: the member to look at. In the `Particle` exercise of Lab 2, sort the particles by position with `std::ranges::sort`, and find the heaviest one with `std::ranges::max_element`, without writing any lambda.
 - **[Easy]** — **Predict it: SFINAE** (slides 7–8 of *More on templates*). Before running [`templates/03-sfinae/sfinae.cpp`](templates/03-sfinae/sfinae.cpp), predict what each line prints. Then remove the first overload of `f`: why does the failure become an error?
@@ -428,6 +318,4 @@ Solution: [`solution.cpp`](templates/02-crtp/solution.cpp).
 
 **Take-away:** use the CRTP in the inner loops, when the types are known at compile time. When you need a collection of different objects chosen at run time, `virtual` is simpler and safer.
 
-**Files on the cluster**: `/home` (10 GB) is for code and small results, `/work` (50 GB) for your projects, `/scratch_local` for jobs that read and write a lot. The scratch folders are deleted after 30 days, and no folder has a backup: keep your code on GitHub.
-
-**Further reading**: on PBS, the slides of the 2025-26 lab, in [`2025-26/05-PBS-algorithms_and_execution_policies`](../../2025-26/05-PBS-algorithms_and_execution_policies). In [`AMSC-CodeExamples/Examples/src`](https://github.com/HPC-Courses/AMSC-CodeExamples/tree/AMSC/Examples/src): [`Templates/VariadicTemplates`](https://github.com/HPC-Courses/AMSC-CodeExamples/tree/AMSC/Examples/src/Templates/VariadicTemplates), [`CompositionWithVariadicTemplates`](https://github.com/HPC-Courses/AMSC-CodeExamples/tree/AMSC/Examples/src/CompositionWithVariadicTemplates) (slide 3), [`Derivatives`](https://github.com/HPC-Courses/AMSC-CodeExamples/tree/AMSC/Examples/src/Derivatives), [`CRTP`](https://github.com/HPC-Courses/AMSC-CodeExamples/tree/AMSC/Examples/src/CRTP) and [`ExpressionTemplates`](https://github.com/HPC-Courses/AMSC-CodeExamples/tree/AMSC/Examples/src/ExpressionTemplates). A factory that forwards any number of arguments to a constructor, with a variadic template: [`make_jacobian`](../../2025-26/03-cache_align-eigen-variadic_templates-traits-factory/02-factory-variadic_templates-traits/src-solution-1/JacobianFactory.hpp), in the Lab 3 of 2025-26.
+**Further reading**: in [`AMSC-CodeExamples/Examples/src`](https://github.com/HPC-Courses/AMSC-CodeExamples/tree/AMSC/Examples/src): [`Templates/VariadicTemplates`](https://github.com/HPC-Courses/AMSC-CodeExamples/tree/AMSC/Examples/src/Templates/VariadicTemplates), [`CompositionWithVariadicTemplates`](https://github.com/HPC-Courses/AMSC-CodeExamples/tree/AMSC/Examples/src/CompositionWithVariadicTemplates) (slide 3), [`Derivatives`](https://github.com/HPC-Courses/AMSC-CodeExamples/tree/AMSC/Examples/src/Derivatives), [`CRTP`](https://github.com/HPC-Courses/AMSC-CodeExamples/tree/AMSC/Examples/src/CRTP) and [`ExpressionTemplates`](https://github.com/HPC-Courses/AMSC-CodeExamples/tree/AMSC/Examples/src/ExpressionTemplates). A factory that forwards any number of arguments to a constructor, with a variadic template: [`make_jacobian`](../../2025-26/03-cache_align-eigen-variadic_templates-traits-factory/02-factory-variadic_templates-traits/src-solution-1/JacobianFactory.hpp), in the Lab 3 of 2025-26.
